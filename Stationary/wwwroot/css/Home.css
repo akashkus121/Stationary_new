@@ -1,0 +1,123 @@
+html, body {
+    overflow-y: hidden; /* disables vertical scroll */
+}
+
+
+.welcome-container {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(120% 120% at 50% 0%, #faf9f5 0%, #f3f2ec 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+}
+
+.welcome-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    padding: 60px 40px;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    animation: slideUp 0.6s ease-out;
+}
+
+@@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px);} to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-title {
+    color: #2c3e50;
+    font-size: 2.6rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #5c7cfa 0%, #4b6cff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-subtitle {
+    color: #6b7280;
+    margin-bottom: 28px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.portal-buttons { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+
+.portal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 26px;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+    .portal-btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+        transition: left 0.5s;
+    }
+
+    .portal-btn:hover::before { left: 100%; }
+
+.admin-btn {
+    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+}
+
+    .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(124, 58, 237, 0.3); color: white; text-decoration: none; }
+
+.user-btn {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+}
+
+    .user-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(16, 185, 129, 0.3); color: white; text-decoration: none; }
+
+.portal-btn:active { transform: translateY(-1px); }
+
+.shop-icon {
+    width: 80px; height: 80px; margin: 0 auto 28px;
+    background: linear-gradient(135deg, #5c7cfa 0%, #4b6cff 100%);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+@@keyframes float { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-10px);} }
+
+.btn-icon { width: 20px; height: 20px; }
+
+.decorative-elements { position: absolute; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+
+.floating-shape { position: absolute; background: rgba(92,124,250,0.08); border-radius: 50%; animation: floatShapes 6s ease-in-out infinite; }
+.shape-1 { width: 60px; height: 60px; top: 20%; left: 10%; animation-delay: 0s; }
+.shape-2 { width: 40px; height: 40px; top: 60%; right: 15%; animation-delay: 2s; }
+.shape-3 { width: 80px; height: 80px; bottom: 20%; left: 20%; animation-delay: 4s; }
+
+@@keyframes floatShapes { 0%,100% { transform: translateY(0) rotate(0);} 50% { transform: translateY(-18px) rotate(180deg);} }
+
+@@media (max-width: 768px) {
+    .welcome-card { padding: 40px 30px; margin: 20px; }
+    .welcome-title { font-size: 2.2rem; }
+    .portal-buttons { gap: 14px; }
+    .portal-btn { padding: 14px 22px; font-size: 16px; }
+}

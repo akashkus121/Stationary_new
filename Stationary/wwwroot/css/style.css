@@ -1,0 +1,73 @@
+body {
+}
+
+/* Floating logout button */
+.logout-fab {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(220, 53, 69, 0.92);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+  z-index: 1050;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.logout-fab:hover {
+  transform: translateY(-1px);
+  background: rgba(200, 35, 51, 0.98);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+}
+
+.logout-fab:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.18);
+}
+
+.logout-fab:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.9), 0 0 0 6px rgba(220,53,69,0.6);
+}
+
+.logout-icon {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
+}
+
+@media (max-width: 576px) {
+  .logout-fab {
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    right: calc(env(safe-area-inset-right, 0px) + 12px);
+    width: 42px;
+    height: 42px;
+  }
+  .logout-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 991.98px) {
+  .logout-fab {
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    right: calc(env(safe-area-inset-right, 0px) + 14px);
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logout-fab {
+    transition: none;
+  }
+}

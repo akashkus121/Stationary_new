@@ -1,0 +1,465 @@
+@model List<Stationary.Models.BulkProductModel>
+
+@{
+    ViewData["Title"] = "Bulk Create Products";
+}
+
+<style>
+    .bulk-create-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .bulk-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .bulk-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 10px;
+    }
+
+    .bulk-subtitle {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    .method-tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .tab-button {
+        background: none;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #718096;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .tab-button.active {
+        color: #4b6cff;
+        border-bottom-color: #4b6cff;
+    }
+
+    .tab-content {
+        display: none;
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .csv-upload-area {
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .csv-upload-area:hover {
+        border-color: #4b6cff;
+        background-color: #f7fafc;
+    }
+
+    .csv-upload-area.dragover {
+        border-color: #4b6cff;
+        background-color: #edf2f7;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #cbd5e0;
+        margin-bottom: 15px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .product-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto;
+        gap: 15px;
+        align-items: end;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        padding: 10px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #4b6cff;
+        box-shadow: 0 0 0 3px rgba(75, 108, 255, 0.1);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .remove-btn {
+        background: #e53e3e;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .remove-btn:hover {
+        background: #c53030;
+    }
+
+    .add-product-btn {
+        background: #48bb78;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .add-product-btn:hover {
+        background: #38a169;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #4b6cff 0%, #3b5bdb 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(75, 108, 255, 0.3);
+    }
+
+    .template-download {
+        background: #edf2f7;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .template-btn {
+        background: #4299e1;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+    .template-btn:hover {
+        background: #3182ce;
+        color: white;
+        text-decoration: none;
+    }
+
+    .instructions {
+        background: #f0fff4;
+        border: 1px solid #9ae6b4;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .instructions h4 {
+        color: #22543d;
+        margin-bottom: 10px;
+    }
+
+    .instructions ul {
+        color: #2f855a;
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .media (max-width: 768px) {
+        .product-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .method-tabs {
+            flex-direction: column;
+        }
+        
+        .tab-button {
+            border-bottom: 1px solid #e2e8f0;
+            border-right: none;
+        }
+    }
+</style>
+
+<div class="bulk-create-container">
+    <div class="bulk-header">
+        <h1 class="bulk-title">Bulk Create Products</h1>
+        <p class="bulk-subtitle">Create multiple products at once using different methods</p>
+    </div>
+
+    <div class="method-tabs">
+        <button class="tab-button active" onclick="showTab('form')">Form Method</button>
+        <button class="tab-button" onclick="showTab('csv')">CSV Upload</button>
+    </div>
+
+    <!-- Form Method Tab -->
+    <div id="form-tab" class="tab-content active">
+        <div class="form-section">
+            <h3 class="section-title">Add Multiple Products</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button type="button" class="add-product-btn" onclick="addProductRow()">
+                    + Add Product
+                </button>
+                <button type="button" class="add-product-btn" onclick="addSampleProducts()" style="background: #4299e1;">
+                    📝 Add Sample Products
+                </button>
+                <button type="button" class="add-product-btn" onclick="clearAllProducts()" style="background: #e53e3e;">
+                    🗑️ Clear All
+                </button>
+            </div>
+            
+            <form asp-action="BulkCreate" method="post" id="bulkForm">
+                <div id="products-container">
+                    <!-- Product rows will be added here -->
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    Create All Products
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CSV Upload Tab -->
+    <div id="csv-tab" class="tab-content">
+        <div class="template-download">
+            <h4>📥 Download CSV Template</h4>
+            <p>Download our template to see the correct format for bulk upload</p>
+            <a href="@Url.Action("DownloadCsvTemplate")" class="template-btn">Download Template</a>
+        </div>
+
+        <div class="instructions">
+            <h4>📋 CSV Format Instructions</h4>
+            <ul>
+                <li>First row should be headers: Name, Category, Price, StockQuantity, LowStockThreshold, IsVisible</li>
+                <li>Each product should be on a separate row</li>
+                <li>Use commas to separate values</li>
+                <li>Price should be in decimal format (e.g., 9.99)</li>
+                <li>IsVisible should be 'true' or 'false'</li>
+            </ul>
+        </div>
+
+        <form asp-action="BulkCreateFromCsv" method="post" enctype="multipart/form-data">
+            <div class="csv-upload-area" onclick="document.getElementById('csvFile').click()">
+                <div class="upload-icon">📁</div>
+                <h4>Click to upload CSV file</h4>
+                <p>or drag and drop your CSV file here</p>
+                <input type="file" id="csvFile" name="csvFile" accept=".csv" style="display: none;" onchange="handleFileSelect(this)">
+            </div>
+            
+            <div id="file-info" style="display: none; margin-top: 15px; padding: 10px; background: #e6fffa; border-radius: 6px;">
+                <strong>Selected file:</strong> <span id="file-name"></span>
+            </div>
+            
+            <button type="submit" class="submit-btn" style="margin-top: 20px;">
+                Upload and Create Products
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let productCount = 0;
+
+    function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Show selected tab
+        document.getElementById(tabName + '-tab').classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function addProductRow() {
+        productCount++;
+        const container = document.getElementById('products-container');
+        
+        const productRow = document.createElement('div');
+        productRow.className = 'product-row';
+        productRow.id = `product-${productCount}`;
+        
+        productRow.innerHTML = `
+            <div class="form-group">
+                <label class="form-label">Product Name *</label>
+                <input type="text" name="products[${productCount - 1}].Name" class="form-control" placeholder="Enter product name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <input type="text" name="products[${productCount - 1}].Category" class="form-control" placeholder="e.g., Office Supplies">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Price *</label>
+                <input type="number" name="products[${productCount - 1}].Price" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Stock</label>
+                <input type="number" name="products[${productCount - 1}].StockQuantity" class="form-control" min="0" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Low Stock</label>
+                <input type="number" name="products[${productCount - 1}].LowStockThreshold" class="form-control" min="0" placeholder="5">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Visible</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="products[${productCount - 1}].IsVisible" checked>
+                    <span>Yes</span>
+                </div>
+            </div>
+            <button type="button" class="remove-btn" onclick="removeProductRow(${productCount})">Remove</button>
+        `;
+        
+        container.appendChild(productRow);
+    }
+
+    function removeProductRow(id) {
+        const productRow = document.getElementById(`product-${id}`);
+        if (productRow) {
+            productRow.remove();
+        }
+    }
+
+    function handleFileSelect(input) {
+        const file = input.files[0];
+        if (file) {
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-info').style.display = 'block';
+        }
+    }
+
+    // Add drag and drop functionality
+    const uploadArea = document.querySelector('.csv-upload-area');
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            document.getElementById('csvFile').files = files;
+            handleFileSelect(document.getElementById('csvFile'));
+        }
+    });
+
+    function addSampleProducts() {
+        const sampleProducts = [
+            { name: "Blue Ballpoint Pen", category: "Writing Tools", price: 1.99, stock: 100, threshold: 20 },
+            { name: "A4 White Paper", category: "Paper", price: 4.99, stock: 50, threshold: 10 },
+            { name: "Stapler", category: "Office Tools", price: 12.99, stock: 25, threshold: 5 },
+            { name: "Sticky Notes", category: "Office Supplies", price: 3.49, stock: 75, threshold: 15 },
+            { name: "Highlighter Set", category: "Writing Tools", price: 6.99, stock: 40, threshold: 8 }
+        ];
+
+        sampleProducts.forEach(product => {
+            addProductRow();
+            const lastRow = document.querySelector('.product-row:last-child');
+            lastRow.querySelector('input[name*=".Name"]').value = product.name;
+            lastRow.querySelector('input[name*=".Category"]').value = product.category;
+            lastRow.querySelector('input[name*=".Price"]').value = product.price;
+            lastRow.querySelector('input[name*=".StockQuantity"]').value = product.stock;
+            lastRow.querySelector('input[name*=".LowStockThreshold"]').value = product.threshold;
+        });
+    }
+
+    function clearAllProducts() {
+        if (confirm('Are you sure you want to clear all products?')) {
+            document.getElementById('products-container').innerHTML = '';
+            productCount = 0;
+            addProductRow(); // Add one empty row back
+        }
+    }
+
+    // Add initial product row
+    addProductRow();
+</script>

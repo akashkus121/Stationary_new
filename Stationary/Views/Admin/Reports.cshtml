@@ -1,0 +1,71 @@
+@model Stationary.Models.SalesReportViewModel
+@{
+    ViewData["Title"] = "Sales Report";
+}
+<link rel="stylesheet" href="~/css/reports.css" />
+<div class="report-container">
+    <div class="report-header">
+        <div class="title-group">
+            <h2>Sales Report</h2>
+            <p class="subtitle">Daily report for <strong>@Model.SelectedDate.ToString("yyyy-MM-dd")</strong></p>
+        </div>
+        <div class="actions">
+            <form method="get" asp-action="Reports" asp-controller="Admin" class="date-form">
+                <input type="date" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+            <a class="btn btn-secondary" href="@Url.Action("ReportsExcel","Admin", new { date = Model.SelectedDate.ToString("yyyy-MM-dd") })">Export Excel</a>
+            <a class="btn btn-danger" href="@Url.Action("ReportsPdf","Admin", new { date = Model.SelectedDate.ToString("yyyy-MM-dd") })">Export PDF</a>
+        </div>
+    </div>
+
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-title">Total Orders</div>
+            <div class="card-value">@Model.TotalOrders</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Items Sold</div>
+            <div class="card-value">@Model.TotalItemsSold</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Total Sales</div>
+            <div class="card-value">$@Model.TotalSalesAmount.ToString("0.00")</div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Rows != null && Model.Rows.Any())
+                {
+                    foreach (var r in Model.Rows)
+                    {
+                        <tr>
+                            <td>#@r.OrderId</td>
+                            <td>@r.OrderDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@r.Username</td>
+                            <td>@r.Items</td>
+                            <td>$@r.Amount.ToString("0.00")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="empty">No orders for this day.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

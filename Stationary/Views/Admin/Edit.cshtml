@@ -1,0 +1,57 @@
+@model Stationary.Models.Product
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    .product-form-container { font-family:'Inter',sans-serif; background: radial-gradient(120% 120% at 50% 0%, #faf9f5 0%, #f3f2ec 100%); min-height:100vh; padding:40px 20px; }
+    .form-card { backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); padding: 40px; max-width: 600px; margin: 0 auto; }
+    .form-title { text-align:center; color:#2c3e50; font-size:2.2rem; font-weight:800; margin-bottom:8px; }
+    .form-subtitle { text-align:center; color:#6b7280; margin-bottom:28px; font-size:1.05rem; }
+    .form-group { position:relative; margin-bottom:20px; }
+    .form-control { width:100%; padding:14px 16px; border:2px solid #e5e7eb; border-radius:12px; font-size:16px; font-weight:600; transition: all .25s ease; }
+    .form-control:focus { outline:none; border-color:#5c7cfa; box-shadow:0 0 0 3px rgba(92,124,250,.12); transform: translateY(-1px); }
+    .submit-btn { width:100%; background: linear-gradient(135deg,#5c7cfa 0%, #4b6cff 100%); color:#fff; border:none; padding:16px 24px; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; transition: all .25s ease; display:flex; align-items:center; justify-content:center; gap:10px; }
+    .submit-btn:hover { transform: translateY(-1px); box-shadow:0 10px 24px rgba(92,124,250,.28); }
+    .upload-area { border:2px dashed #e5e7eb; border-radius:12px; padding:24px; text-align:center; background:#fafafa; cursor:pointer; }
+</style>
+<div class="product-form-container">
+  <div class="form-card">
+    <h2 class="form-title">Edit Product</h2>
+    <p class="form-subtitle">Update details and stock information</p>
+
+    @using (Html.BeginForm("Edit", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+      @Html.HiddenFor(m => m.Id)
+      <div class="form-group">
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "Product Name", required = "required" })
+      </div>
+      <div class="form-group">
+        @Html.TextBoxFor(m => m.Category, new { @class = "form-control", placeholder = "Category", required = "required" })
+      </div>
+      <div class="form-group">
+        @Html.TextBoxFor(m => m.Price, new { @class = "form-control", placeholder = "Price ($)", type = "number", step = "0.01", min = "0", required = "required" })
+      </div>
+      <div class="form-group">
+        @Html.TextBoxFor(m => m.StockQuantity, new { @class = "form-control", placeholder = "Stock Quantity", type = "number", step = "1", min = "0", required = "required" })
+      </div>
+      <div class="form-group">
+        @Html.TextBoxFor(m => m.LowStockThreshold, new { @class = "form-control", placeholder = "Low Stock Threshold", type = "number", step = "1", min = "0", required = "required" })
+      </div>
+      <div class="form-group">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          @Html.CheckBoxFor(m => m.IsVisible, new { style = "width: 18px; height: 18px; margin: 0; cursor: pointer;" })
+          <label style="color: #2d3748; font-weight: 500; cursor: pointer;" for="@Html.IdFor(m => m.IsVisible)">Product Visible</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+          <input type="file" name="image" id="imageInput" style="display:none" accept="image/*" />
+          <div>Click to upload a new image (optional)</div>
+          @if (!string.IsNullOrEmpty(Model.ImagePath)) { <div style="margin-top:8px; color:#6b7280;">Current: @Model.ImagePath</div> }
+        </div>
+      </div>
+      <button type="submit" class="submit-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        Save Changes
+      </button>
+    }
+  </div>
+</div>
