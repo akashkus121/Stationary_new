@@ -136,7 +136,7 @@ Stationary/
 
 ## 🛠️ Technology Stack
 
-- **Backend**: ASP.NET Core 6.0 MVC
+- **Backend**: ASP.NET Core 8.0 MVC
 - **Database**: SQL Server with Entity Framework Core
 - **Frontend**: HTML5, CSS3, JavaScript, jQuery
 - **UI Framework**: Custom CSS with responsive design
