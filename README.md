@@ -145,17 +145,23 @@ Stationary/
 
 ## 📱 Screenshots
 
+### Login Dashboard
+![Login Dashboard](https://github.com/akashkus121/Stationary_new/blob/main/Login%20Page.png)
+###For Admin
 ### Admin Dashboard
-![Admin Dashboard](https://via.placeholder.com/800x400/4b6cff/ffffff?text=Admin+Dashboard)
+![Admin Dashboard](https://github.com/akashkus121/Stationary_new/blob/main/Admin%20Dashboard.png)
+### Bulk Creation along with CSV Upload 
+![Bulk Creation along with CSV Upload](https://github.com/akashkus121/Stationary_new/blob/main/Bulk.png)
+![Bulk Creation along with CSV Upload](https://github.com/akashkus121/Stationary_new/blob/main/csv%20Upload%20Bulk.png)
 
-### Product Management
-![Product Management](https://via.placeholder.com/800x400/28a745/ffffff?text=Product+Management)
+### Sale Management
+![Sale Management](https://github.com/akashkus121/Stationary_new/blob/main/Report%20of%20Sale.png)
 
-### Bulk Creation Interface
-![Bulk Creation](https://via.placeholder.com/800x400/e74c3c/ffffff?text=Bulk+Product+Creation)
-
+###For User
 ### User Shopping Interface
-![User Interface](https://via.placeholder.com/800x400/17a2b8/ffffff?text=User+Shopping+Interface)
+![User Interface](https://github.com/akashkus121/Stationary_new/blob/main/User%20View%20.png)
+### Cart Interface
+![Cart Interface](https://github.com/akashkus121/Stationary_new/blob/main/Cart%20View.png)
 
 ## 🔧 Configuration
 
