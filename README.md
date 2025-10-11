@@ -34,7 +34,8 @@ A comprehensive web-based inventory management system for stationary products, b
 ## 🚀 Quick Start
 
 ### Prerequisites
-- .NET 6.0 SDK or later
+- .NET 8
+- .0 SDK or later
 - SQL Server (LocalDB or full instance)
 - Visual Studio 2022 or VS Code
 
