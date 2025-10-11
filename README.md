@@ -147,7 +147,7 @@ Stationary/
 
 ### Login Dashboard
 ![Login Dashboard](https://github.com/akashkus121/Stationary_new/blob/main/Login%20Page.png)
-###For Admin
+## For Admin
 ### Admin Dashboard
 ![Admin Dashboard](https://github.com/akashkus121/Stationary_new/blob/main/Admin%20Dashboard.png)
 ### Bulk Creation along with CSV Upload 
@@ -157,7 +157,7 @@ Stationary/
 ### Sale Management
 ![Sale Management](https://github.com/akashkus121/Stationary_new/blob/main/Report%20of%20Sale.png)
 
-###For User
+## For User
 ### User Shopping Interface
 ![User Interface](https://github.com/akashkus121/Stationary_new/blob/main/User%20View%20.png)
 ### Cart Interface
@@ -205,11 +205,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Akash Kushwaha** - *Initial work* - [YourGitHub](https://github.com/akashkus121)
 
-## 🙏 Acknowledgments
 
-- ASP.NET Core team for the excellent framework
-- Entity Framework team for the ORM
-- All contributors who helped improve this project
 
 ## 📞 Support
 
