@@ -161,7 +161,7 @@ namespace Stationary.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _productService.GetProductByIdAsync(id);
             if (product == null)
                 return NotFound(new { message = "Product not found." });
 

@@ -66,8 +66,10 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({ onOpenAuth }) => {
     }
   };
 
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
+  const loadProducts = useCallback(async (showSpinner = true) => {
+    if (showSpinner && products.length === 0) {
+      setLoading(true);
+    }
     setError('');
     try {
       const res = await api.getProducts({
@@ -85,20 +87,35 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({ onOpenAuth }) => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, selectedCategory, stockFilter, page]);
+  }, [debouncedSearch, selectedCategory, stockFilter, page, products.length]);
 
   useEffect(() => {
     loadCategories();
   }, []);
 
   useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+    loadProducts(products.length === 0);
+  }, [loadProducts, products.length]);
 
-  // Real-time Server-Sent Events (SSE) listener for stock updates
+  // Real-time Server-Sent Events (SSE): Targeted in-memory stock patch (Zero unnecessary network refetches)
   useEffect(() => {
-    const unsubscribe = subscribeToStockEvents(() => {
-      loadProducts();
+    const unsubscribe = subscribeToStockEvents((eventData) => {
+      if (eventData && eventData.productId) {
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === eventData.productId
+              ? {
+                  ...p,
+                  stockQuantity: eventData.stockQuantity !== undefined ? eventData.stockQuantity : p.stockQuantity,
+                  isVisible: eventData.isVisible !== undefined ? eventData.isVisible : p.isVisible,
+                }
+              : p
+          )
+        );
+      } else {
+        api.clearProductCache();
+        loadProducts(false);
+      }
     });
     return () => unsubscribe();
   }, [loadProducts]);

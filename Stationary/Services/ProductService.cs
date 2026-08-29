@@ -192,26 +192,64 @@ namespace Stationary.Services
 
         public async Task<IEnumerable<Product>> GetAvailableProductsAsync(bool includeOutOfStock = false)
         {
+            var cacheKey = $"products:available:{includeOutOfStock}";
+            var cached = await _cache.GetAsync<List<Product>>(cacheKey);
+            if (cached != null)
+            {
+                return cached;
+            }
+
+            List<Product> products;
             if (includeOutOfStock)
-                return await _db.Products.Where(p => p.IsVisible).ToListAsync();
-            
-            return await _db.Products
-                .Where(p => p.StockQuantity > 0 && p.IsVisible)
-                .ToListAsync();
+            {
+                products = await _db.Products.AsNoTracking().Where(p => p.IsVisible).ToListAsync();
+            }
+            else
+            {
+                products = await _db.Products
+                    .AsNoTracking()
+                    .Where(p => p.StockQuantity > 0 && p.IsVisible)
+                    .ToListAsync();
+            }
+
+            await _cache.SetAsync(cacheKey, products, DefaultCacheTtl);
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetOutOfStockProductsAsync()
         {
-            return await _db.Products
+            const string cacheKey = "products:outofstock";
+            var cached = await _cache.GetAsync<List<Product>>(cacheKey);
+            if (cached != null)
+            {
+                return cached;
+            }
+
+            var products = await _db.Products
+                .AsNoTracking()
                 .Where(p => p.StockQuantity <= 0 && p.IsVisible)
                 .ToListAsync();
+
+            await _cache.SetAsync(cacheKey, products, DefaultCacheTtl);
+            return products;
         }
 
         public async Task<IEnumerable<Product>> GetLowStockProductsAsync()
         {
-            return await _db.Products
+            const string cacheKey = "products:lowstock";
+            var cached = await _cache.GetAsync<List<Product>>(cacheKey);
+            if (cached != null)
+            {
+                return cached;
+            }
+
+            var products = await _db.Products
+                .AsNoTracking()
                 .Where(p => p.StockQuantity > 0 && p.StockQuantity <= p.LowStockThreshold && p.IsVisible)
                 .ToListAsync();
+
+            await _cache.SetAsync(cacheKey, products, DefaultCacheTtl);
+            return products;
         }
 
         public async Task<StockAlertSummary> GetStockAlertSummaryAsync()

@@ -136,6 +136,15 @@ export const api = {
   },
 
   // Products
+  // Memory Cache for Product Details & Collections (Instant Navigation)
+  _productDetailsCache: new Map<number, { data: any; timestamp: number }>(),
+  _catalogCache: new Map<string, { data: any; timestamp: number }>(),
+
+  clearProductCache() {
+    this._productDetailsCache.clear();
+    this._catalogCache.clear();
+  },
+
   async getProducts(params?: {
     search?: string;
     category?: string;
@@ -150,9 +159,31 @@ export const api = {
     if (params?.page) query.append('page', params.page.toString());
     if (params?.pageSize) query.append('pageSize', params.pageSize.toString());
 
+    const cacheKey = query.toString();
+    const cached = this._catalogCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < 30000) {
+      return cached.data;
+    }
+
     const res = await fetch(`${API_BASE_URL}/productsapi?${query.toString()}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to fetch products.');
+
+    this._catalogCache.set(cacheKey, { data, timestamp: Date.now() });
+    return data;
+  },
+
+  async getProductById(id: number): Promise<any> {
+    const cached = this._productDetailsCache.get(id);
+    if (cached && Date.now() - cached.timestamp < 60000) {
+      return cached.data;
+    }
+
+    const res = await fetch(`${API_BASE_URL}/productsapi/${id}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to fetch product details.');
+
+    this._productDetailsCache.set(id, { data, timestamp: Date.now() });
     return data;
   },
 
@@ -174,6 +205,7 @@ export const api = {
   },
 
   async createProduct(formData: FormData) {
+    this.clearProductCache();
     const res = await fetch(`${API_BASE_URL}/productsapi`, {
       method: 'POST',
       headers: getHeaders(true),
@@ -185,6 +217,7 @@ export const api = {
   },
 
   async updateProduct(id: number, formData: FormData) {
+    this.clearProductCache();
     const res = await fetch(`${API_BASE_URL}/productsapi/${id}`, {
       method: 'PUT',
       headers: getHeaders(true),
@@ -196,6 +229,7 @@ export const api = {
   },
 
   async toggleProductVisibility(id: number) {
+    this.clearProductCache();
     const res = await fetch(`${API_BASE_URL}/productsapi/${id}/visibility`, {
       method: 'PATCH',
       headers: getHeaders(),
@@ -206,6 +240,7 @@ export const api = {
   },
 
   async deleteProduct(id: number) {
+    this.clearProductCache();
     const res = await fetch(`${API_BASE_URL}/productsapi/${id}`, {
       method: 'DELETE',
       headers: getHeaders(),

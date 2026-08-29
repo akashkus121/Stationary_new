@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { X, Lock, User as UserIcon, Shield, Eye, EyeOff, KeyRound, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import {
+  X,
+  Lock,
+  User as UserIcon,
+  Shield,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Sparkles,
+  CheckCircle2,
+  ArrowRight,
+  UserPlus,
+  PenTool,
+  ShieldCheck
+} from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -45,7 +59,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialTab = 'logi
         onClose();
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred. Please try again.');
+      setError(err.message || 'Authentication failed. Please verify your credentials.');
     } finally {
       setLoading(false);
     }
@@ -59,35 +73,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialTab = 'logi
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop luxury-auth-backdrop" onClick={onClose}>
       <div
-        className="modal-card auth-modal responsive-auth-card"
+        className="modal-card luxury-auth-card"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="modal-header auth-modal-header">
-          <div className="modal-title-group">
-            <div className="auth-header-pill">
-              <Sparkles size={13} className="sparkle-icon" />
-              <span>{isLoginTab ? 'Secure Portal' : 'New Member Registration'}</span>
-            </div>
-            <h2 className="modal-title">{isLoginTab ? 'Welcome Back' : 'Create Account'}</h2>
-            <p className="modal-subtitle">
+        {/* Glow Ambient Decoration */}
+        <div className="auth-ambient-glow" />
+
+        {/* Close Button */}
+        <button
+          className="luxury-modal-close-btn"
+          onClick={onClose}
+          aria-label="Close modal"
+        >
+          <X size={18} />
+        </button>
+
+        {/* Brand Header */}
+        <div className="luxury-auth-header">
+          <div className="luxury-brand-badge">
+            <PenTool size={22} className="brand-badge-icon" />
+          </div>
+          <div className="luxury-auth-title-box">
+            <span className="luxury-auth-kicker">
+              <Sparkles size={13} className="kicker-sparkle" />
+              {isLoginTab ? 'Executive Client Portal' : 'New Member Registration'}
+            </span>
+            <h2 className="luxury-auth-title">
+              {isLoginTab ? 'Welcome Back' : 'Create Your Account'}
+            </h2>
+            <p className="luxury-auth-desc">
               {isLoginTab
-                ? 'Sign in to access your cart, order history, and executive catalog'
-                : 'Join Lumina Atelier as an Executive Client or Administrator'}
+                ? 'Sign in to access your curated catalog, orders & bespoke cart'
+                : 'Join Lumina Atelier for premium executive stationery & workspace solutions'}
             </p>
           </div>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Close authentication modal">
-            <X size={18} />
-          </button>
         </div>
 
-        {/* Tab Toggle */}
-        <div className="auth-tabs">
+        {/* Segmented Tab Controls */}
+        <div className="luxury-auth-tab-segment">
           <button
             type="button"
-            className={`auth-tab ${isLoginTab ? 'active' : ''}`}
+            className={`luxury-tab-btn ${isLoginTab ? 'active' : ''}`}
             onClick={() => {
               setIsLoginTab(true);
               setError('');
@@ -98,28 +126,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialTab = 'logi
           </button>
           <button
             type="button"
-            className={`auth-tab ${!isLoginTab ? 'active' : ''}`}
+            className={`luxury-tab-btn ${!isLoginTab ? 'active' : ''}`}
             onClick={() => {
               setIsLoginTab(false);
               setError('');
             }}
           >
-            <UserIcon size={15} />
-            <span>Register</span>
+            <UserPlus size={15} />
+            <span>Create Account</span>
           </button>
         </div>
 
-        {error && <div className="alert-box alert-error">{error}</div>}
+        {/* Error Alert */}
+        {error && (
+          <div className="luxury-auth-alert">
+            <span>{error}</span>
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label className="form-label">Username</label>
-            <div className="input-with-icon">
-              <UserIcon size={17} className="input-icon" />
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="luxury-auth-form">
+          <div className="luxury-form-group">
+            <label className="luxury-form-label">Username</label>
+            <div className="luxury-input-wrapper">
+              <UserIcon size={17} className="luxury-input-icon" />
               <input
                 type="text"
-                className="form-input"
-                placeholder="Enter your username"
+                className="luxury-form-input"
+                placeholder="Enter your username (e.g. test)"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
@@ -128,27 +162,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialTab = 'logi
             </div>
           </div>
 
-          <div className="form-group">
-            <div className="label-row-flex">
-              <label className="form-label">Password</label>
-              {isLoginTab && (
-                <span className="form-hint-text">Minimum 4 characters</span>
-              )}
+          <div className="luxury-form-group">
+            <div className="luxury-label-split">
+              <label className="luxury-form-label">Password</label>
+              {isLoginTab && <span className="luxury-label-hint">Min. 4 characters</span>}
             </div>
-            <div className="input-with-icon">
-              <Lock size={17} className="input-icon" />
+            <div className="luxury-input-wrapper">
+              <Lock size={17} className="luxury-input-icon" />
               <input
                 type={showPassword ? 'text' : 'password'}
-                className="form-input"
+                className="luxury-form-input password-field"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete={isLoginTab ? "current-password" : "new-password"}
+                autoComplete={isLoginTab ? 'current-password' : 'new-password'}
                 required
               />
               <button
                 type="button"
-                className="password-toggle-btn"
+                className="luxury-eye-toggle-btn"
                 onClick={() => setShowPassword(!showPassword)}
                 title={showPassword ? 'Hide password' : 'Show password'}
                 aria-label="Toggle password visibility"
@@ -159,33 +191,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialTab = 'logi
           </div>
 
           {!isLoginTab && (
-            <div className="form-group role-selection-group">
-              <label className="form-label">Select Account Role</label>
-              <div className="role-selector">
+            <div className="luxury-form-group">
+              <label className="luxury-form-label">Select Account Role</label>
+              <div className="luxury-role-grid">
                 <button
                   type="button"
-                  className={`role-option ${role === 'User' ? 'active' : ''}`}
+                  className={`luxury-role-card ${role === 'User' ? 'active' : ''}`}
                   onClick={() => setRole('User')}
                 >
-                  <UserIcon size={17} />
-                  <div className="role-option-text">
-                    <strong>User</strong>
-                    <small>Standard Storefront Access</small>
+                  <div className="role-card-header">
+                    <UserIcon size={18} className="role-icon" />
+                    {role === 'User' && <CheckCircle2 size={16} className="role-check-active" />}
                   </div>
-                  {role === 'User' && <CheckCircle2 size={15} className="role-check" />}
+                  <div className="role-card-body">
+                    <strong className="role-name">Executive Shopper</strong>
+                    <span className="role-desc">Storefront catalog, purchasing & order tracking</span>
+                  </div>
                 </button>
 
                 <button
                   type="button"
-                  className={`role-option ${role === 'Admin' ? 'active' : ''}`}
+                  className={`luxury-role-card ${role === 'Admin' ? 'active' : ''}`}
                   onClick={() => setRole('Admin')}
                 >
-                  <Shield size={17} />
-                  <div className="role-option-text">
-                    <strong>Admin</strong>
-                    <small>Inventory & Management</small>
+                  <div className="role-card-header">
+                    <Shield size={18} className="role-icon" />
+                    {role === 'Admin' && <CheckCircle2 size={16} className="role-check-active" />}
                   </div>
-                  {role === 'Admin' && <CheckCircle2 size={15} className="role-check" />}
+                  <div className="role-card-body">
+                    <strong className="role-name">Administrator</strong>
+                    <span className="role-desc">Inventory management, CSV import & sales reports</span>
+                  </div>
                 </button>
               </div>
             </div>
@@ -193,44 +229,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialTab = 'logi
 
           <button
             type="submit"
-            className="btn btn-primary btn-full auth-submit-btn"
+            className="btn-luxury-auth-submit"
             disabled={loading}
           >
             {loading ? (
-              <span>Authenticating...</span>
+              <span className="btn-loading-text">Authenticating...</span>
             ) : isLoginTab ? (
               <>
-                <span>Sign In to Account</span>
-                <ArrowRight size={16} />
+                <span>Sign In to Lumina Atelier</span>
+                <ArrowRight size={17} />
               </>
             ) : (
               <>
-                <span>Create Account</span>
-                <Sparkles size={16} />
+                <span>Complete Registration</span>
+                <Sparkles size={17} />
               </>
             )}
           </button>
         </form>
 
-        {/* Quick Demo Logins Helper */}
-        <div className="auth-demo-hint">
-          <span className="demo-label">Quick Demo Access:</span>
-          <div className="demo-chips">
+        {/* Demo Credentials Footer */}
+        <div className="luxury-auth-footer">
+          <div className="auth-security-badge">
+            <ShieldCheck size={14} className="security-icon" />
+            <span>256-Bit Encrypted Secure Authentication</span>
+          </div>
+
+          <div className="luxury-demo-chip-bar">
+            <span className="demo-chip-label">Quick Demo Access:</span>
             <button
               type="button"
-              className="auth-demo-chip"
+              className="luxury-demo-chip"
               onClick={() => handleQuickFill('test', '12345')}
               title="Click to fill Test User credentials"
             >
-              Test User • <strong>12345</strong>
-            </button>
-            <button
-              type="button"
-              className="auth-demo-chip"
-              onClick={() => handleQuickFill('akash', '12345')}
-              title="Click to fill Akash Admin credentials"
-            >
-              Admin (Akash) • <strong>12345</strong>
+              <span>Test User</span>
+              <span className="demo-chip-divider">•</span>
+              <strong>12345</strong>
             </button>
           </div>
         </div>
@@ -238,3 +273,4 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialTab = 'logi
     </div>
   );
 };
+
