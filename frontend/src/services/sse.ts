@@ -1,5 +1,5 @@
 export function subscribeToStockEvents(onStockUpdate: (data: any) => void): () => void {
-  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  const apiBase = import.meta.env.VITE_API_BASE_URL || 'https://stationary-new-1.onrender.com/api';
   const streamUrl = `${apiBase}/events/stream`;
 
   let eventSource: EventSource | null = null;

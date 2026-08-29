@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://stationary-new-1.onrender.com/api';
 
 const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
