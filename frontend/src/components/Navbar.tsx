@@ -1,19 +1,17 @@
 import React from 'react';
-import { ShoppingCart, User as UserIcon, ShieldAlert, LogOut, PenTool, PackageCheck } from 'lucide-react';
+import { User as UserIcon, ShieldAlert, LogOut, PenTool } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
 
 interface NavbarProps {
   onOpenAuth: (tab?: 'login' | 'register') => void;
-  onOpenMyOrders: () => void;
+  onOpenMyOrders?: () => void;
   onOpenProfile?: () => void;
-  activeTab: 'catalog' | 'admin';
+  activeTab?: 'catalog' | 'admin';
   setActiveTab: (tab: 'catalog' | 'admin') => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenMyOrders, onOpenProfile, activeTab, setActiveTab }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenProfile, setActiveTab }) => {
   const { user, isAdmin, logout } = useAuth();
-  const { itemCount, setIsCartOpen } = useCart();
 
   return (
     <header className="navbar-container">

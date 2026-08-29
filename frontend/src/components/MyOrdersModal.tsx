@@ -11,7 +11,6 @@ import {
   ChevronUp,
   Tag,
   CheckCircle2,
-  Clock,
   Sparkles,
   ArrowUpRight
 } from 'lucide-react';

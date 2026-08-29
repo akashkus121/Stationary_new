@@ -1,18 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Search,
-  Filter,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
   Package,
   AlertCircle,
   ArrowUpDown,
-  X,
-  SlidersHorizontal,
-  Sparkles,
-  Grid,
-  Check
+  X
 } from 'lucide-react';
 import type { Product } from '../types';
 import { api } from '../services/api';
@@ -31,7 +26,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({ onOpenAuth }) => {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [stockFilter, setStockFilter] = useState('available');
+  const stockFilter = 'available';
   const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc'>('default');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);

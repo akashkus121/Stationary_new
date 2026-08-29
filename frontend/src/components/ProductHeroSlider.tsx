@@ -3,14 +3,12 @@ import {
   Sparkles,
   ShoppingBag,
   Flame,
-  Plus,
   Check,
   Truck,
   ShieldCheck,
   Award,
   ChevronLeft,
-  ChevronRight,
-  ArrowRight
+  ChevronRight
 } from 'lucide-react';
 import type { Product } from '../types';
 import { useCart } from '../context/CartContext';
