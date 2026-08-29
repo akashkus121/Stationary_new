@@ -267,5 +267,238 @@ namespace Stationary.Services
             var key = $"refreshtoken:{userId}";
             await RemoveAsync(key);
         }
+
+        // =====================================================================
+        // Message Queue Implementation (Upstash Redis + In-Memory Fallback)
+        // =====================================================================
+        private static readonly ConcurrentDictionary<string, ConcurrentQueue<string>> _memoryQueueFallback = new();
+
+        public async Task<long> EnqueueAsync<T>(string queueName, T item)
+        {
+            var fullKey = FormatKey(queueName);
+            var serialized = JsonSerializer.Serialize(item);
+
+            // 1. In-memory queue fallback
+            var memQueue = _memoryQueueFallback.GetOrAdd(fullKey, _ => new ConcurrentQueue<string>());
+            memQueue.Enqueue(serialized);
+
+            // 2. Try TCP Redis LPUSH
+            try
+            {
+                if (_redis != null && _redis.IsConnected && _db != null)
+                {
+                    return await _db.ListLeftPushAsync(fullKey, serialized);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis TCP LPUSH error for queue {QueueName}, falling back to REST/memory", fullKey);
+            }
+
+            // 3. Try Upstash REST LPUSH
+            if (!string.IsNullOrEmpty(_upstashRestUrl) && !string.IsNullOrEmpty(_upstashRestToken))
+            {
+                try
+                {
+                    var res = await _httpClient.PostAsync(
+                        $"{_upstashRestUrl}/lpush/{Uri.EscapeDataString(fullKey)}/{Uri.EscapeDataString(serialized)}",
+                        null);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        using var stream = await res.Content.ReadAsStreamAsync();
+                        using var doc = await JsonDocument.ParseAsync(stream);
+                        if (doc.RootElement.TryGetProperty("result", out var resultEl) && resultEl.TryGetInt64(out var len))
+                        {
+                            return len;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Upstash REST LPUSH error for queue {QueueName}", fullKey);
+                }
+            }
+
+            return memQueue.Count;
+        }
+
+        public async Task<T?> DequeueAsync<T>(string queueName)
+        {
+            var fullKey = FormatKey(queueName);
+
+            // 1. Try TCP Redis RPOP
+            try
+            {
+                if (_redis != null && _redis.IsConnected && _db != null)
+                {
+                    var val = await _db.ListRightPopAsync(fullKey);
+                    if (val.HasValue && !string.IsNullOrEmpty(val.ToString()))
+                    {
+                        // Also dequeue from memory fallback if present
+                        if (_memoryQueueFallback.TryGetValue(fullKey, out var q))
+                        {
+                            q.TryDequeue(out _);
+                        }
+                        return JsonSerializer.Deserialize<T>(val.ToString()!);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis TCP RPOP error for queue {QueueName}, falling back to REST/memory", fullKey);
+            }
+
+            // 2. Try Upstash REST RPOP
+            if (!string.IsNullOrEmpty(_upstashRestUrl) && !string.IsNullOrEmpty(_upstashRestToken))
+            {
+                try
+                {
+                    var res = await _httpClient.PostAsync(
+                        $"{_upstashRestUrl}/rpop/{Uri.EscapeDataString(fullKey)}",
+                        null);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        using var stream = await res.Content.ReadAsStreamAsync();
+                        using var doc = await JsonDocument.ParseAsync(stream);
+                        if (doc.RootElement.TryGetProperty("result", out var resultEl) && resultEl.ValueKind == JsonValueKind.String)
+                        {
+                            var json = resultEl.GetString();
+                            if (!string.IsNullOrEmpty(json))
+                            {
+                                if (_memoryQueueFallback.TryGetValue(fullKey, out var q))
+                                {
+                                    q.TryDequeue(out _);
+                                }
+                                return JsonSerializer.Deserialize<T>(json);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Upstash REST RPOP error for queue {QueueName}", fullKey);
+                }
+            }
+
+            // 3. Fallback to in-memory queue
+            if (_memoryQueueFallback.TryGetValue(fullKey, out var memQ) && memQ.TryDequeue(out var fallbackJson))
+            {
+                return JsonSerializer.Deserialize<T>(fallbackJson);
+            }
+
+            return default;
+        }
+
+        public async Task<List<T>> GetQueueItemsAsync<T>(string queueName, int start = 0, int stop = -1)
+        {
+            var fullKey = FormatKey(queueName);
+            var result = new List<T>();
+
+            // 1. Try TCP Redis LRANGE
+            try
+            {
+                if (_redis != null && _redis.IsConnected && _db != null)
+                {
+                    var items = await _db.ListRangeAsync(fullKey, start, stop);
+                    foreach (var item in items)
+                    {
+                        if (item.HasValue && !string.IsNullOrEmpty(item.ToString()))
+                        {
+                            var obj = JsonSerializer.Deserialize<T>(item.ToString()!);
+                            if (obj != null) result.Add(obj);
+                        }
+                    }
+                    if (result.Any()) return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Redis TCP LRANGE error for queue {QueueName}", fullKey);
+            }
+
+            // 2. Try Upstash REST LRANGE
+            if (!string.IsNullOrEmpty(_upstashRestUrl) && !string.IsNullOrEmpty(_upstashRestToken))
+            {
+                try
+                {
+                    var res = await _httpClient.GetAsync($"{_upstashRestUrl}/lrange/{Uri.EscapeDataString(fullKey)}/{start}/{stop}");
+                    if (res.IsSuccessStatusCode)
+                    {
+                        using var stream = await res.Content.ReadAsStreamAsync();
+                        using var doc = await JsonDocument.ParseAsync(stream);
+                        if (doc.RootElement.TryGetProperty("result", out var resultEl) && resultEl.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var el in resultEl.EnumerateArray())
+                            {
+                                var jsonStr = el.GetString();
+                                if (!string.IsNullOrEmpty(jsonStr))
+                                {
+                                    var obj = JsonSerializer.Deserialize<T>(jsonStr);
+                                    if (obj != null) result.Add(obj);
+                                }
+                            }
+                            if (result.Any()) return result;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Upstash REST LRANGE error for queue {QueueName}", fullKey);
+                }
+            }
+
+            // 3. Fallback to memory
+            if (_memoryQueueFallback.TryGetValue(fullKey, out var memQ))
+            {
+                foreach (var json in memQ)
+                {
+                    var obj = JsonSerializer.Deserialize<T>(json);
+                    if (obj != null) result.Add(obj);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<long> GetQueueLengthAsync(string queueName)
+        {
+            var fullKey = FormatKey(queueName);
+
+            try
+            {
+                if (_redis != null && _redis.IsConnected && _db != null)
+                {
+                    return await _db.ListLengthAsync(fullKey);
+                }
+            }
+            catch { }
+
+            if (!string.IsNullOrEmpty(_upstashRestUrl) && !string.IsNullOrEmpty(_upstashRestToken))
+            {
+                try
+                {
+                    var res = await _httpClient.GetAsync($"{_upstashRestUrl}/llen/{Uri.EscapeDataString(fullKey)}");
+                    if (res.IsSuccessStatusCode)
+                    {
+                        using var stream = await res.Content.ReadAsStreamAsync();
+                        using var doc = await JsonDocument.ParseAsync(stream);
+                        if (doc.RootElement.TryGetProperty("result", out var resultEl) && resultEl.TryGetInt64(out var len))
+                        {
+                            return len;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            if (_memoryQueueFallback.TryGetValue(fullKey, out var memQ))
+            {
+                return memQ.Count;
+            }
+
+            return 0;
+        }
     }
 }
