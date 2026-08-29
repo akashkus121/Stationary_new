@@ -11,13 +11,12 @@ PRINT '';
 -- Step 1: Create database and tables
 PRINT 'Step 1: Creating database and tables...';
 PRINT '----------------------------------------';
-:r "01_CreateDatabase.sql"
 PRINT '';
 
 -- Step 2: Create performance indexes
 PRINT 'Step 2: Creating performance indexes...';
 PRINT '----------------------------------------';
-:r "02_CreateIndexes.sql"
+
 PRINT '';
 
 -- Step 3: Create table type for stored procedures

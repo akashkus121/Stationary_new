@@ -625,7 +625,7 @@ BEGIN
     INSERT INTO Users (Username, Password, Role, Email, Phone) VALUES 
     ('admin', 'admin123', 'Admin', 'admin@stationary.com', '1234567890'),
     ('user', 'user123', 'User', 'user@stationary.com', '0987654321'),
-    ('akash', 'akash123', 'Admin', 'akash@stationary.com', '9087654321');
+    ('akash', '12345', 'Admin', 'akash@stationary.com', '9087654321');
     PRINT 'Sample users created successfully!';
 END
 ELSE
@@ -669,7 +669,7 @@ PRINT '';
 PRINT 'Default credentials:';
 PRINT 'Admin: admin / admin123';
 PRINT 'User: user / user123';
-PRINT 'Akash: akash / akash123';
+PRINT 'Akash: akash / 12345';
 PRINT '';
 PRINT 'Features included:';
 PRINT '- Complete cart management with UPI payment support';

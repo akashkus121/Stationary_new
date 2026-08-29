@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Stationary.Models;
 
 namespace Stationary.Data
@@ -32,6 +32,13 @@ namespace Stationary.Data
                 .HasMany(o => o.OrderItems)
                 .WithOne()
                 .HasForeignKey(oi => oi.OrderId);
+
+            modelBuilder.Entity<Product>().Property(p => p.Price).HasPrecision(18, 2);
+            modelBuilder.Entity<Order>().Property(o => o.TotalAmount).HasPrecision(18, 2);
+            modelBuilder.Entity<Order>().Property(o => o.Subtotal).HasPrecision(18, 2);
+            modelBuilder.Entity<Order>().Property(o => o.TaxAmount).HasPrecision(18, 2);
+            modelBuilder.Entity<OrderItem>().Property(oi => oi.Price).HasPrecision(18, 2);
+            modelBuilder.Entity<OrderItem>().Property(oi => oi.TotalPrice).HasPrecision(18, 2);
         }
     }
 }

@@ -47,9 +47,11 @@ namespace Stationary.Models
         // Property to control product visibility
         public bool IsVisible { get; set; } = true;
 
-        // Additional properties for stored procedures
+        // Additional properties for stored procedures and Multi-Admin ownership
+        public int? AdminId { get; set; }
+        public string? AdminUsername { get; set; }
         public string? Description { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedDate { get; set; }
         public bool IsActive { get; set; } = true;
 

@@ -17,5 +17,8 @@ namespace Stationary.Models
         [Required(ErrorMessage = "Role is required")]
         [StringLength(20, ErrorMessage = "Role cannot exceed 20 characters")]
         public string Role { get; set; } = string.Empty;
+
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
     }
 }

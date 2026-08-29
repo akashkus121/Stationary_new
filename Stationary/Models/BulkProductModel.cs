@@ -22,6 +22,9 @@ namespace Stationary.Models
         public int LowStockThreshold { get; set; } = 5;
 
         public bool IsVisible { get; set; } = true;
+
+        public string? ImageUrl { get; set; }
+        public string? ImagePath { get; set; }
     }
 }
 

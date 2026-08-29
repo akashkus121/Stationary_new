@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: stationary-api
+    env: docker
+    dockerfilePath: ./Stationary/Dockerfile
+    dockerContext: ./Stationary
+    plan: free
+    region: singapore
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: ConnectionStrings__Redis
+        sync: false
+      - key: Jwt__Secret
+        generateValue: true
+      - key: Cloudinary__CloudName
+        sync: false
+      - key: Cloudinary__ApiKey
+        sync: false
+      - key: Cloudinary__ApiSecret
+        sync: false

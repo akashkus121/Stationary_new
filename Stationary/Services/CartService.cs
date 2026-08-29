@@ -44,7 +44,8 @@ namespace Stationary.Services
 
             if (existingItem != null)
             {
-                existingItem.Quantity = quantity;
+                existingItem.Quantity += quantity;
+                existingItem.UpdatedDate = DateTime.UtcNow;
             }
             else
             {
@@ -52,7 +53,8 @@ namespace Stationary.Services
                 {
                     UserId = userId,
                     ProductId = productId,
-                    Quantity = quantity
+                    Quantity = quantity,
+                    AddedDate = DateTime.UtcNow
                 };
                 _db.Carts.Add(existingItem);
             }
@@ -125,8 +127,8 @@ namespace Stationary.Services
         {
             return await _db.Carts
                 .Include(c => c.Product)
-                .Where(c => c.UserId == userId)
-                .SumAsync(c => c.Product.Price * c.Quantity);
+                .Where(c => c.UserId == userId && c.Product != null)
+                .SumAsync(c => c.Product!.Price * c.Quantity);
         }
 
         public async Task<bool> ValidateCartStockAsync(int userId)

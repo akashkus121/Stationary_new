@@ -207,7 +207,7 @@ The complete script includes sample data:
 ### Default Users
 - **Admin**: `admin` / `admin123`
 - **User**: `user` / `user123`
-- **Akash**: `akash` / `akash123`
+- **Akash**: `akash` / `12345`
 
 ### Sample Products
 - Blue Ballpoint Pen - $1.99

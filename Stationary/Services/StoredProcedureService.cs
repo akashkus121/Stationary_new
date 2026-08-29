@@ -1,8 +1,6 @@
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Stationary.Data;
 using Stationary.Models;
-using System.Data;
 
 namespace Stationary.Services
 {
@@ -23,363 +21,179 @@ namespace Stationary.Services
     public class StoredProcedureService : IStoredProcedureService
     {
         private readonly ApplicationDbContext _db;
-        private readonly string _connectionString;
 
-        public StoredProcedureService(ApplicationDbContext db, IConfiguration configuration)
+        public StoredProcedureService(ApplicationDbContext db)
         {
             _db = db;
-            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? 
-                               _db.Database.GetConnectionString() ?? 
-                               throw new InvalidOperationException("Connection string not found");
         }
 
         public async Task<StockAlertSummary> GetStockAlertSummaryAsync()
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_GetStockAlertSummary", connection)
+            var products = await _db.Products.AsNoTracking().ToListAsync();
+            return new StockAlertSummary
             {
-                CommandType = CommandType.StoredProcedure
+                TotalProducts = products.Count,
+                OutOfStockProducts = products.Count(p => p.StockQuantity <= 0),
+                LowStockProducts = products.Count(p => p.StockQuantity > 0 && p.StockQuantity <= p.LowStockThreshold),
+                InStockProducts = products.Count(p => p.StockQuantity > p.LowStockThreshold),
+                VisibleProducts = products.Count(p => p.IsVisible),
+                HiddenProducts = products.Count(p => !p.IsVisible)
             };
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            if (await reader.ReadAsync())
-            {
-                return new StockAlertSummary
-                {
-                    TotalProducts = reader.GetInt32("TotalProducts"),
-                    OutOfStockProducts = reader.GetInt32("OutOfStock"),
-                    LowStockProducts = reader.GetInt32("LowStock"),
-                    InStockProducts = reader.GetInt32("InStock"),
-                    VisibleProducts = reader.GetInt32("VisibleProducts"),
-                    HiddenProducts = reader.GetInt32("HiddenProducts")
-                };
-            }
-
-            return new StockAlertSummary();
         }
 
         public async Task<IEnumerable<Product>> GetProductsByStockStatusAsync(string stockStatus, string? category = null, string? searchTerm = null, int page = 1, int pageSize = 20)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_GetProductsByStockStatus", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
+            var query = _db.Products.AsNoTracking().AsQueryable();
 
-            command.Parameters.AddWithValue("@StockStatus", stockStatus);
-            command.Parameters.AddWithValue("@Category", (object?)category ?? DBNull.Value);
-            command.Parameters.AddWithValue("@SearchTerm", (object?)searchTerm ?? DBNull.Value);
-            command.Parameters.AddWithValue("@Page", page);
-            command.Parameters.AddWithValue("@PageSize", pageSize);
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            var products = new List<Product>();
-            while (await reader.ReadAsync())
+            if (!string.IsNullOrWhiteSpace(category))
             {
-                products.Add(new Product
-                {
-                    Id = reader.GetInt32("Id"),
-                    Name = reader.GetString("Name"),
-                    Category = reader.GetString("Category"),
-                    Price = reader.GetDecimal("Price"),
-                    ImagePath = reader.IsDBNull("ImagePath") ? null : reader.GetString("ImagePath"),
-                    StockQuantity = reader.GetInt32("StockQuantity"),
-                    LowStockThreshold = reader.GetInt32("LowStockThreshold"),
-                    IsVisible = reader.GetBoolean("IsVisible"),
-                    Description = reader.IsDBNull("Description") ? null : reader.GetString("Description"),
-                    CreatedDate = reader.GetDateTime("CreatedDate")
-                });
+                query = query.Where(p => p.Category == category);
             }
 
-            return products;
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(term) || p.Category.ToLower().Contains(term));
+            }
+
+            switch (stockStatus.ToLower())
+            {
+                case "outofstock":
+                    query = query.Where(p => p.StockQuantity <= 0);
+                    break;
+                case "lowstock":
+                    query = query.Where(p => p.StockQuantity > 0 && p.StockQuantity <= p.LowStockThreshold);
+                    break;
+                case "instock":
+                    query = query.Where(p => p.StockQuantity > p.LowStockThreshold);
+                    break;
+            }
+
+            return await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public async Task<bool> BulkUpdateStockAsync(List<StockUpdateModel> stockUpdates)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_BulkUpdateStock", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
+            if (stockUpdates == null || stockUpdates.Count == 0) return true;
 
-            // Create DataTable for table-valued parameter
-            var stockUpdateTable = new DataTable();
-            stockUpdateTable.Columns.Add("ProductId", typeof(int));
-            stockUpdateTable.Columns.Add("NewStockQuantity", typeof(int));
-            stockUpdateTable.Columns.Add("NewLowStockThreshold", typeof(int));
-            stockUpdateTable.Columns.Add("ProductName", typeof(string));
-            stockUpdateTable.Columns.Add("CurrentStock", typeof(int));
-            stockUpdateTable.Columns.Add("CurrentLowStockThreshold", typeof(int));
+            var productIds = stockUpdates.Select(u => u.ProductId).ToList();
+            var products = await _db.Products.Where(p => productIds.Contains(p.Id)).ToListAsync();
 
             foreach (var update in stockUpdates)
             {
-                stockUpdateTable.Rows.Add(
-                    update.ProductId,
-                    update.NewStockQuantity,
-                    update.NewLowStockThreshold,
-                    update.ProductName,
-                    update.CurrentStock,
-                    update.CurrentLowStockThreshold
-                );
+                var prod = products.FirstOrDefault(p => p.Id == update.ProductId);
+                if (prod != null)
+                {
+                    prod.StockQuantity = update.NewStockQuantity;
+                    prod.LowStockThreshold = update.NewLowStockThreshold;
+                }
             }
 
-            var parameter = command.Parameters.AddWithValue("@StockUpdates", stockUpdateTable);
-            parameter.SqlDbType = SqlDbType.Structured;
-            parameter.TypeName = "dbo.StockUpdateTableType";
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            if (await reader.ReadAsync())
-            {
-                var updatedProducts = reader.GetInt32("UpdatedProducts");
-                var errors = reader.GetInt32("Errors");
-                return errors == 0;
-            }
-
-            return false;
+            await _db.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<Product>> GetLowStockAlertsAsync()
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_GetLowStockAlerts", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            var products = new List<Product>();
-            while (await reader.ReadAsync())
-            {
-                products.Add(new Product
-                {
-                    Id = reader.GetInt32("Id"),
-                    Name = reader.GetString("Name"),
-                    Category = reader.GetString("Category"),
-                    Price = reader.GetDecimal("Price"),
-                    StockQuantity = reader.GetInt32("StockQuantity"),
-                    LowStockThreshold = reader.GetInt32("LowStockThreshold")
-                });
-            }
-
-            return products;
+            return await _db.Products
+                .AsNoTracking()
+                .Where(p => p.StockQuantity <= p.LowStockThreshold)
+                .ToListAsync();
         }
 
         public async Task<bool> UpdateProductVisibilityAsync(bool autoHideOutOfStock = true)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_UpdateProductVisibility", connection)
+            if (autoHideOutOfStock)
             {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            command.Parameters.AddWithValue("@AutoHideOutOfStock", autoHideOutOfStock);
-
-            await connection.OpenAsync();
-            var result = await command.ExecuteScalarAsync();
-            return result != null;
+                var outOfStock = await _db.Products.Where(p => p.StockQuantity <= 0 && p.IsVisible).ToListAsync();
+                foreach (var p in outOfStock)
+                {
+                    p.IsVisible = false;
+                }
+                await _db.SaveChangesAsync();
+            }
+            return true;
         }
 
         public async Task<IEnumerable<Cart>> GetCartItemsAsync(int userId)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_GetCartItems", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            command.Parameters.AddWithValue("@UserId", userId);
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            var cartItems = new List<Cart>();
-            while (await reader.ReadAsync())
-            {
-                cartItems.Add(new Cart
-                {
-                    Id = reader.GetInt32("CartId"),
-                    UserId = userId,
-                    ProductId = reader.GetInt32("ProductId"),
-                    Quantity = reader.GetInt32("Quantity"),
-                    AddedDate = reader.GetDateTime("AddedDate"),
-                    Product = new Product
-                    {
-                        Id = reader.GetInt32("ProductId"),
-                        Name = reader.GetString("Name"),
-                        Category = reader.GetString("Category"),
-                        Price = reader.GetDecimal("Price"),
-                        ImagePath = reader.IsDBNull("ImagePath") ? null : reader.GetString("ImagePath"),
-                        StockQuantity = reader.GetInt32("StockQuantity"),
-                        LowStockThreshold = reader.GetInt32("LowStockThreshold"),
-                        IsVisible = reader.GetBoolean("IsVisible")
-                    }
-                });
-            }
-
-            return cartItems;
+            return await _db.Carts
+                .AsNoTracking()
+                .Include(c => c.Product)
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
         }
 
         public async Task<int> CreateOrderAsync(int userId, decimal subtotal, decimal taxAmount, decimal totalAmount, string paymentMethod = "cash", string orderStatus = "Pending", string? notes = null)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_CreateOrder", connection)
+            var order = new Order
             {
-                CommandType = CommandType.StoredProcedure
+                UserId = userId,
+                Subtotal = subtotal,
+                TaxAmount = taxAmount,
+                TotalAmount = totalAmount,
+                PaymentMethod = paymentMethod,
+                Date = DateTime.UtcNow
             };
 
-            command.Parameters.AddWithValue("@UserId", userId);
-            command.Parameters.AddWithValue("@Subtotal", subtotal);
-            command.Parameters.AddWithValue("@TaxAmount", taxAmount);
-            command.Parameters.AddWithValue("@TotalAmount", totalAmount);
-            command.Parameters.AddWithValue("@PaymentMethod", paymentMethod);
-            command.Parameters.AddWithValue("@OrderStatus", orderStatus);
-            command.Parameters.AddWithValue("@Notes", (object?)notes ?? DBNull.Value);
-
-            var orderIdParameter = command.Parameters.Add("@OrderId", SqlDbType.Int);
-            orderIdParameter.Direction = ParameterDirection.Output;
-
-            await connection.OpenAsync();
-            await command.ExecuteNonQueryAsync();
-
-            return (int)orderIdParameter.Value;
+            _db.Orders.Add(order);
+            await _db.SaveChangesAsync();
+            return order.Id;
         }
 
         public async Task<IEnumerable<Order>> GetOrderHistoryAsync(int userId, int page = 1, int pageSize = 20)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_GetOrderHistory", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            command.Parameters.AddWithValue("@UserId", userId);
-            command.Parameters.AddWithValue("@Page", page);
-            command.Parameters.AddWithValue("@PageSize", pageSize);
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            var orders = new List<Order>();
-            while (await reader.ReadAsync())
-            {
-                orders.Add(new Order
-                {
-                    Id = reader.GetInt32("Id"),
-                    UserId = userId,
-                    TotalAmount = reader.GetDecimal("TotalAmount"),
-                    Date = reader.GetDateTime("Date"),
-                    PaymentMethod = reader.GetString("PaymentMethod")
-                });
-            }
-
-            return orders;
+            return await _db.Orders
+                .AsNoTracking()
+                .Include(o => o.OrderItems)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.Date)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public async Task<Order?> GetOrderDetailsAsync(int orderId, int userId)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_GetOrderDetails", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
-            command.Parameters.AddWithValue("@OrderId", orderId);
-            command.Parameters.AddWithValue("@UserId", userId);
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            if (await reader.ReadAsync())
-            {
-                var order = new Order
-                {
-                    Id = reader.GetInt32("Id"),
-                    UserId = userId,
-                    TotalAmount = reader.GetDecimal("TotalAmount"),
-                    Date = reader.GetDateTime("Date"),
-                    PaymentMethod = reader.GetString("PaymentMethod")
-                };
-
-                // Read order items if there are multiple result sets
-                if (reader.NextResult())
-                {
-                    var orderItems = new List<OrderItem>();
-                    while (await reader.ReadAsync())
-                    {
-                        orderItems.Add(new OrderItem
-                        {
-                            Id = reader.GetInt32("Id"),
-                            OrderId = orderId,
-                            ProductId = reader.GetInt32("ProductId"),
-                            ProductName = reader.GetString("ProductName"),
-                            Quantity = reader.GetInt32("Quantity"),
-                            Price = reader.GetDecimal("Price")
-                        });
-                    }
-                    order.OrderItems = orderItems;
-                }
-
-                return order;
-            }
-
-            return null;
+            return await _db.Orders
+                .AsNoTracking()
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
         }
 
         public async Task<SalesReportViewModel> GetSalesReportAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            using var connection = new SqlConnection(_connectionString);
-            using var command = new SqlCommand("usp_GetSalesReport", connection)
+            var query = _db.Orders.AsNoTracking().AsQueryable();
+
+            if (startDate.HasValue)
             {
-                CommandType = CommandType.StoredProcedure
+                query = query.Where(o => o.Date >= startDate.Value);
+            }
+            if (endDate.HasValue)
+            {
+                query = query.Where(o => o.Date <= endDate.Value);
+            }
+
+            var orders = await query.ToListAsync();
+            var totalOrders = orders.Count;
+            var totalRevenue = orders.Sum(o => o.TotalAmount);
+            var totalSubtotal = orders.Sum(o => o.Subtotal);
+            var totalTax = orders.Sum(o => o.TaxAmount);
+            var uniqueCustomers = orders.Select(o => o.UserId).Distinct().Count();
+
+            return new SalesReportViewModel
+            {
+                TotalOrders = totalOrders,
+                TotalRevenue = totalRevenue,
+                TotalSubtotal = totalSubtotal,
+                TotalTax = totalTax,
+                AverageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0,
+                UniqueCustomers = uniqueCustomers,
+                TotalSalesAmount = totalRevenue
             };
-
-            command.Parameters.AddWithValue("@StartDate", (object?)startDate ?? DBNull.Value);
-            command.Parameters.AddWithValue("@EndDate", (object?)endDate ?? DBNull.Value);
-
-            await connection.OpenAsync();
-            using var reader = await command.ExecuteReaderAsync();
-            
-            var report = new SalesReportViewModel();
-            
-            if (await reader.ReadAsync())
-            {
-                report.TotalOrders = reader.GetInt32("TotalOrders");
-                report.TotalRevenue = reader.GetDecimal("TotalRevenue");
-                report.TotalSubtotal = reader.GetDecimal("TotalSubtotal");
-                report.TotalTax = reader.GetDecimal("TotalTax");
-                report.AverageOrderValue = reader.GetDecimal("AverageOrderValue");
-                report.UniqueCustomers = reader.GetInt32("UniqueCustomers");
-                
-                // Set legacy properties for backward compatibility
-                report.TotalSalesAmount = report.TotalRevenue;
-            }
-
-            // Read top selling products if there are multiple result sets
-            if (reader.NextResult())
-            {
-                var topProducts = new List<dynamic>();
-                while (await reader.ReadAsync())
-                {
-                    topProducts.Add(new
-                    {
-                        ProductName = reader.GetString("ProductName"),
-                        TotalQuantity = reader.GetInt32("TotalQuantity"),
-                        TotalRevenue = reader.GetDecimal("TotalRevenue"),
-                        OrderCount = reader.GetInt32("OrderCount")
-                    });
-                }
-                report.TopSellingProducts = topProducts;
-            }
-
-            return report;
         }
     }
 }

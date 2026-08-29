@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Project specific additions
+.dotnet/
+**/node_modules/
+**/dist/
+.agents/
+.gemini/
+*.tmp
+Stationary/.dotnet/
+frontend/dist/
