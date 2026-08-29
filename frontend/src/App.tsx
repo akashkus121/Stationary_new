@@ -27,10 +27,12 @@ function MainApp() {
     setIsAuthOpen(true);
   };
 
-  // Auto-switch to admin suite when logging in as Admin
+  // Auto-switch to admin suite when logging in as Admin, or switch back to catalog on logout
   useEffect(() => {
     if (isAdmin) {
       setActiveTab('admin');
+    } else {
+      setActiveTab('catalog');
     }
   }, [isAdmin]);
 
@@ -59,7 +61,9 @@ function MainApp() {
 
       {/* Page Content */}
       <main className="main-content">
-        {activeTab === 'catalog' ? (
+        {activeTab === 'admin' && isAdmin ? (
+          <AdminDashboard />
+        ) : (
           <CatalogPage
             onOpenAuth={handleOpenAuth}
             onOpenMyOrders={() => {
@@ -67,12 +71,6 @@ function MainApp() {
               else setIsMyOrdersOpen(true);
             }}
           />
-        ) : isAdmin ? (
-          <AdminDashboard />
-        ) : (
-          <div className="alert-box alert-error">
-            <span>Admin authorization required to access this area.</span>
-          </div>
         )}
       </main>
 
