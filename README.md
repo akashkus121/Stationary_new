@@ -1,232 +1,181 @@
-# 🏪 LocalLifePlus Dashboard - Stationary Management System
+# 🖋️ Lumina Atelier - Executive Stationery & Workspace Management System
 
-A comprehensive web-based inventory management system for stationary products, built with ASP.NET Core MVC. This system provides both admin and user interfaces for managing products, inventory, and orders.
+A full-stack, enterprise-grade Stationery & Inventory Management platform built with **ASP.NET Core 8 Web API** and **React 19 + TypeScript (Vite)**. Featuring real-time stock sync via Server-Sent Events (SSE), distributed caching with Upstash Redis, PostgreSQL (Supabase) database persistence, PDF/Excel daily sales intelligence reporting, and a luxury executive storefront.
 
-![Dashboard Preview](https://img.shields.io/badge/Status-Active-brightgreen) ![.NET Version](https://img.shields.io/badge/.NET-6.0-blue) ![Database](https://img.shields.io/badge/Database-SQL%20Server-orange)
-
-## 🌟 Features
-
-### 👨‍💼 Admin Features
-- **Product Management**: Add, edit, delete, and view products
-- **Bulk Product Creation**: Create multiple products at once using forms or CSV upload
-- **Inventory Management**: Track stock levels and low stock alerts
-- **Stock Visibility Control**: Show/hide products based on availability
-- **Reports & Analytics**: View sales reports and inventory statistics
-- **OCR Inventory Upload**: Upload inventory using image recognition
-- **User Management**: Manage user accounts and roles
-
-### 👤 User Features
-- **Product Catalog**: Browse available products with search and filtering
-- **Shopping Cart**: Add products to cart with stock validation
-- **Stock-Aware Cart**: Prevents adding more items than available in stock
-- **Real-time Stock Display**: See current stock levels for each product
-- **Category Filtering**: Filter products by category
-- **Responsive Design**: Works on desktop and mobile devices
-
-### 🔧 Technical Features
-- **Stock Validation**: Prevents overselling with real-time stock checks
-- **CSV Import/Export**: Bulk data management capabilities
-- **Image Upload**: Product image management
-- **Session Management**: Secure user authentication
-- **Responsive UI**: Modern, mobile-friendly interface
-- **Error Handling**: Comprehensive error management and user feedback
-
-## 🚀 Quick Start
-
-### Prerequisites
-- .NET 8
-- .0 SDK or later
-- SQL Server (LocalDB or full instance)
-- Visual Studio 2022 or VS Code
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/LocalLifePlusDashboard.git
-   cd LocalLifePlusDashboard/Stationary
-   ```
-
-2. **Restore packages**
-   ```bash
-   dotnet restore
-   ```
-
-3. **Update connection string**
-   - Open `appsettings.json`
-   - Update the connection string to point to your SQL Server instance:
-   ```json
-   {
-     "ConnectionStrings": {
-       "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=StationaryDB;Trusted_Connection=true;MultipleActiveResultSets=true"
-     }
-   }
-   ```
-
-4. **Run database migrations**
-   ```bash
-   dotnet ef database update
-   ```
-
-5. **Run the application**
-   ```bash
-   dotnet run
-   ```
-
-6. **Access the application**
-   - Open your browser and navigate to `https://localhost:5001`
-   - Default admin credentials: `admin` / `admin123`
-
-## 📁 Project Structure
-
-```
-Stationary/
-├── Controllers/           # MVC Controllers
-│   ├── AdminController.cs # Admin functionality
-│   ├── UserController.cs  # User functionality
-│   └── AccountController.cs # Authentication
-├── Models/               # Data Models
-│   ├── Product.cs        # Product entity
-│   ├── Cart.cs          # Shopping cart
-│   ├── User.cs          # User entity
-│   └── BulkProductModel.cs # Bulk creation model
-├── Views/               # Razor Views
-│   ├── Admin/           # Admin interface
-│   ├── User/            # User interface
-│   └── Shared/          # Shared layouts
-├── Services/            # Business Logic
-│   ├── ProductService.cs
-│   ├── CartService.cs
-│   └── OcrInventoryService.cs
-├── Data/               # Database related
-│   ├── ApplicationDbContext.cs
-│   └── DatabaseSetup/   # SQL scripts
-└── wwwroot/            # Static files
-    ├── css/            # Stylesheets
-    ├── js/             # JavaScript files
-    └── images/         # Product images
-```
-
-## 🎯 Key Features in Detail
-
-### 📦 Product Management
-- **Single Product Creation**: Traditional form-based product addition
-- **Bulk Product Creation**: 
-  - Form-based multiple product entry
-  - CSV file upload with template download
-  - Sample product generator
-- **Product Editing**: Update product details, prices, and stock
-- **Image Management**: Upload and manage product images
-
-### 🛒 Shopping Cart System
-- **Stock Validation**: Real-time stock checking prevents overselling
-- **Quantity Limits**: Users cannot add more items than available in stock
-- **Visual Stock Display**: Clear indication of available stock
-- **Cart Management**: Add, remove, and update quantities
-
-### 📊 Inventory Management
-- **Stock Tracking**: Real-time stock level monitoring
-- **Low Stock Alerts**: Automatic notifications for low inventory
-- **Stock Visibility**: Control which products are visible to users
-- **Bulk Stock Updates**: Update multiple products at once
-
-### 📈 Reporting & Analytics
-- **Sales Reports**: Track product performance
-- **Inventory Reports**: Stock level analysis
-- **User Activity**: Monitor user interactions
-
-## 🛠️ Technology Stack
-
-- **Backend**: ASP.NET Core 8.0 MVC
-- **Database**: SQL Server with Entity Framework Core
-- **Frontend**: HTML5, CSS3, JavaScript, jQuery
-- **UI Framework**: Custom CSS with responsive design
-- **Authentication**: Session-based authentication
-- **File Processing**: CSV import/export, image upload
-
-## 📱 Screenshots
-
-### Login Dashboard
-![Login Dashboard](https://github.com/akashkus121/Stationary_new/blob/main/Login%20Page.png)
-## For Admin
-### Admin Dashboard
-![Admin Dashboard](https://github.com/akashkus121/Stationary_new/blob/main/Admin%20Dashboard.png)
-### Bulk Creation along with CSV Upload 
-![Bulk Creation along with CSV Upload](https://github.com/akashkus121/Stationary_new/blob/main/Bulk.png)
-![Bulk Creation along with CSV Upload](https://github.com/akashkus121/Stationary_new/blob/main/csv%20Upload%20Bulk.png)
-
-### Sale Management
-![Sale Management](https://github.com/akashkus121/Stationary_new/blob/main/Report%20of%20Sale.png)
-
-## For User
-### User Shopping Interface
-![User Interface](https://github.com/akashkus121/Stationary_new/blob/main/User%20View%20.png)
-### Cart Interface
-![Cart Interface](https://github.com/akashkus121/Stationary_new/blob/main/Cart%20View.png)
-
-## 🔧 Configuration
-
-### Database Setup
-The application uses Entity Framework Core with SQL Server. Database scripts are included in the `Data/DatabaseSetup/` folder.
-
-### Environment Variables
-- `TESSDATA_PREFIX`: Path to Tesseract data files (for OCR functionality)
-
-### File Uploads
-- Product images are stored in `wwwroot/images/`
-- CSV files are processed temporarily during upload
-
-## 🚀 Deployment
-
-### Local Development
-1. Ensure SQL Server is running
-2. Update connection string in `appsettings.json`
-3. Run `dotnet ef database update`
-4. Start the application with `dotnet run`
-
-### Production Deployment
-1. Update connection string for production database
-2. Configure IIS or Azure App Service
-3. Set up SSL certificates
-4. Configure environment variables
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Authors
-
-- **Akash Kushwaha** - *Initial work* - [YourGitHub](https://github.com/akashkus121)
-
-
-
-## 📞 Support
-
-If you have any questions or need help with the project, please:
-- Open an issue on GitHub
-- Contact us at [908akashkushwaha@gmail.com]
-- Check the documentation in the `/docs` folder
-
-## 🔄 Version History
-
-- **v1.0.0** - Initial release with basic product management
-- **v1.1.0** - Added bulk product creation
-- **v1.2.0** - Implemented stock validation and cart system
-- **v1.3.0** - Added CSV import/export functionality
-- **v1.4.0** - Enhanced UI and mobile responsiveness
+[![.NET 8](https://img.shields.io/badge/.NET-8.0_Web_API-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![React 19](https://img.shields.io/badge/React-19.0_TypeScript-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL_Supabase-336791?logo=postgresql&logoColor=white)](https://supabase.com/)
+[![Redis](https://img.shields.io/badge/Cache-Upstash_Redis-DC382D?logo=redis&logoColor=white)](https://upstash.com/)
+[![Docker](https://img.shields.io/badge/Container-Docker_Multi--Stage-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Render](https://img.shields.io/badge/Backend_Deploy-Render-46E3B7?logo=render&logoColor=black)](https://render.com/)
+[![Vercel](https://img.shields.io/badge/Frontend_Deploy-Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 
 ---
 
-⭐ **Star this repository if you found it helpful!**
+## 🌟 Key Capabilities & Features
 
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/LocalLifePlusDashboard?style=social)](https://github.com/yourusername/LocalLifePlusDashboard/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/yourusername/LocalLifePlusDashboard?style=social)](https://github.com/yourusername/LocalLifePlusDashboard/network)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/LocalLifePlusDashboard)](https://github.com/yourusername/LocalLifePlusDashboard/issues)
+### 🛍️ Luxury Customer Storefront
+- **Static Best Sellers Showcase**: Clean 4-product curated showcase with rank badges (no intrusive sliders/carousels).
+- **Debounced Instant Search**: 350ms debounced live search for seamless item and category filtering without server churn.
+- **Floating Action Navigation (FABs)**:
+  - **Cart FAB (Bottom-Right)**: Pulsing item counter badge, real-time total quantity indicator.
+  - **My Orders FAB (Bottom-Left)**: Instant access to purchase ledger and delivery receipts.
+- **Stock-Aware Cart Steppers**: Automatically transforms the single `Add to Cart` button into an interactive quantity stepper `[-] Qty [+]` when added to cart.
+- **Seamless Multi-Option Checkout**: Supports UPI (Copy ID / QR Code), Credit/Debit Card (auto-formatting & CVV), and Cash on Delivery.
+- **Localized Pricing**: Configured with standard Indian Rupee (`Rs.`) formatting across catalog, drawer, receipts, and order histories.
+
+### 🛡️ Admin Management Suite
+- **Stock Management & Alerts**: Quick-stock stepper controls, low-stock threshold badges, and bulk save workflows.
+- **Batch CSV Product Ingestion**: Download pre-formatted CSV template, live CSV preview table with validation badges, and 1-click batch database insertion.
+- **Sales Intelligence & Reports**:
+  - Real-time KPIs: Gross Revenue, Orders Placed, Units Sold, and Average Order Value (AOV).
+  - Daily Transaction Ledger with instant search and date presets (Today, Yesterday, 7 Days Ago).
+  - 1-Click PDF Statement generation via **QuestPDF** and Excel spreadsheets via **ClosedXML**.
+- **Real-Time SSE Sync**: Automatically broadcasts inventory and purchase events across connected browser sessions via `/api/events/stream`.
+
+---
+
+## 📁 Repository Structure
+
+```
+Stationary_new/
+├── Stationary/                     # ASP.NET Core 8 Web API Backend
+│   ├── Controllers/                # REST API Controllers
+│   │   ├── AuthController.cs       # JWT Authentication & Auto-seed
+│   │   ├── ProductsController.cs   # Product CRUD, Pagination & Best Sellers
+│   │   ├── CartController.cs       # Stock-validated Cart Operations
+│   │   ├── OrdersController.cs     # Checkout, Transactions & Receipts
+│   │   ├── AdminController.cs      # Stock Steppers, Visibility & CSV Ingestion
+│   │   ├── ReportsController.cs    # Daily Sales, PDF & Excel Exports
+│   │   └── EventsController.cs     # Server-Sent Events (SSE) Stock Stream
+│   ├── Data/                       # Entity Framework Core & Supabase Context
+│   │   ├── ApplicationDbContext.cs # Npgsql EF Core DBContext
+│   │   └── DatabaseSetup/          # PostgreSQL installation & stored procedures
+│   ├── Models/                     # Data Models & DTOs
+│   │   ├── Product.cs              # Product Entity
+│   │   ├── User.cs                 # User Entity & Role Enum
+│   │   ├── Cart.cs                 # Cart Item DTOs
+│   │   └── Order.cs                # Order & OrderItem Entities
+│   ├── Services/                   # Business Services & Cloud Integrations
+│   │   ├── ProductService.cs       # Product Repository Logic
+│   │   ├── CartService.cs          # Redis + DB Cart Synchronization
+│   │   ├── RedisCacheService.cs    # Upstash Redis + Resilient In-Memory Fallback
+│   │   ├── EventStreamService.cs   # Real-time SSE Stock Broadcast Service
+│   │   └── CloudinaryService.cs    # Cloudinary Image Hosting Integration
+│   ├── appsettings.json            # Configuration & Connection Strings
+│   ├── Dockerfile                  # Backend Multi-Stage Dockerfile (QuestPDF + OCR)
+│   └── Stationary.csproj           # .NET 8 Project Dependencies
+│
+├── frontend/                       # React 19 + TypeScript Frontend (Vite)
+│   ├── public/                     # Static Assets & Icons
+│   ├── src/
+│   │   ├── components/             # Reusable UI Components
+│   │   │   ├── Navbar.tsx          # Top Bar & User Avatar
+│   │   │   ├── TopSellingSection.tsx # Static 4-Product Best Sellers Grid
+│   │   │   ├── ProductCard.tsx     # Streamlined Product Card with Stepper
+│   │   │   ├── CartDrawer.tsx      # Slide-out Shopping Cart & Breakdown
+│   │   │   ├── CheckoutModal.tsx   # Multi-step Payment & Receipt Modal
+│   │   │   ├── MyOrdersModal.tsx   # Purchase Ledger & Tracking Modal
+│   │   │   ├── AuthModal.tsx       # Luxury Segmented Sign In / Register Modal
+│   │   │   └── UserProfileModal.tsx # Account Settings & Lifetime Stats
+│   │   ├── context/                # React Context Providers
+│   │   │   ├── AuthContext.tsx     # Authentication State & Auto-refresh
+│   │   │   └── CartContext.tsx     # Cart State, Counts & Steppers
+│   │   ├── pages/
+│   │   │   ├── CatalogPage.tsx     # Executive Storefront with Debounced Search
+│   │   │   └── AdminDashboard.tsx  # 5-Tab Admin Management Suite
+│   │   ├── services/
+│   │   │   ├── api.ts              # Fetch API Client & Endpoints
+│   │   │   └── sse.ts              # SSE EventSource Connection Manager
+│   │   ├── index.css               # Luxury Executive Design System (Vanilla CSS)
+│   │   ├── App.tsx                 # Root Layout & Dynamic Tab Router
+│   │   └── main.tsx                # React Root Entrypoint
+│   ├── .env.production             # Render API Base URL
+│   ├── package.json                # Dependencies & Scripts
+│   ├── tsconfig.json               # TypeScript Compiler Configuration
+│   └── vite.config.ts              # Vite Bundler Setup
+│
+├── Dockerfile                      # Root Dockerfile for Render Deployments
+├── render.yaml                     # Render Infrastructure as Code (Blueprint)
+└── README.md                       # Documentation & Project Guide
+```
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 19, TypeScript, Vite, Lucide Icons, Vanilla CSS Design System |
+| **Backend** | ASP.NET Core 8 Web API, C#, Entity Framework Core 9 |
+| **Database** | PostgreSQL on Supabase (Npgsql) |
+| **Caching** | Upstash Redis Distributed Cache + In-Memory Fallback |
+| **Document Generation** | QuestPDF (PDF Statements), ClosedXML (Excel Reports) |
+| **Media Hosting** | Cloudinary DotNet API |
+| **Real-time Engine** | Server-Sent Events (SSE) `/api/events/stream` |
+| **Container & Cloud** | Docker Multi-Stage Build, Render (Backend API), Vercel (Frontend) |
+
+---
+
+## 🚀 Getting Started Locally
+
+### 1. Prerequisites
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js 18+](https://nodejs.org/) & npm
+
+### 2. Backend Setup (`/Stationary`)
+```bash
+# Navigate to backend directory
+cd Stationary
+
+# Restore dependencies
+dotnet restore
+
+# Run API (defaults to http://localhost:5000)
+dotnet run
+```
+
+### 3. Frontend Setup (`/frontend`)
+```bash
+# Navigate to frontend directory
+cd ../frontend
+
+# Install dependencies
+npm install
+
+# Start development server (defaults to http://localhost:5173)
+npm run dev
+```
+
+### 4. Default Demo Credentials
+- **Standard User**: `test` / `12345` (or 1-click fill in the Login Modal)
+- **Admin**: `akash` / `12345`
+
+---
+
+## ☁️ Deployment
+
+### Backend on Render (Docker)
+1. Link your repository in [Render.com](https://dashboard.render.com/).
+2. Select **Docker** environment.
+   - **Docker Context**: `./Stationary`
+   - **Dockerfile Path**: `./Stationary/Dockerfile`
+3. Set environment variables:
+   - `ConnectionStrings__DefaultConnection`: Your Supabase PostgreSQL connection string.
+   - `ConnectionStrings__Redis`: Your Upstash Redis connection string.
+   - `Jwt__Secret`: Your JWT signing secret.
+
+### Frontend on Vercel
+1. Import repository in [Vercel](https://vercel.com/).
+2. Set **Root Directory** to `frontend`.
+3. Set environment variable:
+   ```env
+   VITE_API_BASE_URL=https://<your-render-backend-url>/api
+   ```
+4. Deploy!
+
+---
+
+## 📝 License
+This project is licensed under the [MIT License](LICENSE).
