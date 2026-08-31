@@ -44,6 +44,13 @@ namespace Stationary.Services
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var eventStream = scope.ServiceProvider.GetRequiredService<IEventStreamService>();
 
+            // Recover any stranded items in the processing queue from a previous restart/crash
+            var recoveredCount = await redisCache.RecoverProcessingQueueAsync<Stationary.Controllers.OrdersController.QueuedOrderDto>("orders:processing", "orders:pending");
+            if (recoveredCount > 0)
+            {
+                _logger.LogInformation("Recovered {Count} unacknowledged orders from 'orders:processing' back to 'orders:pending'.", recoveredCount);
+            }
+
             var pendingActions = await fallbackQueue.GetPendingActionsAsync();
             var pendingOrderCount = await redisCache.GetQueueLengthAsync("orders:pending");
 
@@ -69,16 +76,21 @@ namespace Stationary.Services
             }
 
             // =====================================================================
-            // 1. Process Queued Orders from Upstash Redis Message Queue
+            // 1. Process Queued Orders from Upstash Redis (Reliable Queue: BRPOPLPUSH)
             // =====================================================================
             if (pendingOrderCount > 0)
             {
-                _logger.LogInformation("Master database online. Synchronizing {Count} queued orders from Upstash Redis...", pendingOrderCount);
+                _logger.LogInformation("Master database online. Synchronizing {Count} queued orders from Redis Reliable Queue (BRPOPLPUSH)...", pendingOrderCount);
 
                 int syncedOrders = 0;
                 while (pendingOrderCount > 0 && !stoppingToken.IsCancellationRequested)
                 {
-                    var queuedOrder = await redisCache.DequeueAsync<Stationary.Controllers.OrdersController.QueuedOrderDto>("orders:pending");
+                    // Atomically pops from 'orders:pending' and pushes to 'orders:processing' (Zero Data Loss)
+                    var queuedOrder = await redisCache.DequeueWithReliableProcessingAsync<Stationary.Controllers.OrdersController.QueuedOrderDto>(
+                        "orders:pending",
+                        "orders:processing",
+                        TimeSpan.FromSeconds(2));
+
                     if (queuedOrder == null) break;
 
                     try
@@ -116,6 +128,9 @@ namespace Stationary.Services
                         db.Orders.Add(order);
                         await db.SaveChangesAsync(stoppingToken);
 
+                        // Acknowledge completion: Remove from 'orders:processing' now that DB write has succeeded
+                        await redisCache.AcknowledgeAsync("orders:processing", queuedOrder);
+
                         // Remove from user-level Redis queue
                         var userOrdersKey = $"orders:user:{queuedOrder.UserId}";
                         var userOrders = await redisCache.GetAsync<List<Stationary.Controllers.OrdersController.QueuedOrderDto>>(userOrdersKey);
@@ -136,15 +151,15 @@ namespace Stationary.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to persist queued order {QueueId}. Re-enqueueing to Redis.", queuedOrder.QueueId);
-                        await redisCache.EnqueueAsync("orders:pending", queuedOrder);
+                        _logger.LogError(ex, "Failed to persist queued order {QueueId} to SQL database. Re-enqueueing back to 'orders:pending'.", queuedOrder.QueueId);
+                        await redisCache.RequeueFailedAsync("orders:processing", "orders:pending", queuedOrder);
                         break;
                     }
                 }
 
                 if (syncedOrders > 0)
                 {
-                    _logger.LogInformation("Successfully synced {Count} orders from Upstash Redis to PostgreSQL database.", syncedOrders);
+                    _logger.LogInformation("Successfully synced {Count} orders from Redis Reliable Queue to PostgreSQL database.", syncedOrders);
                     await redisCache.RemoveByPatternAsync("products:*");
 
                     eventStream.BroadcastEvent("stock_update", new

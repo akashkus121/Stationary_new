@@ -143,7 +143,7 @@ Stationary_new/
 | **Frontend** | React 19, TypeScript, Vite, Lucide Icons, Vanilla CSS Design System |
 | **Backend** | ASP.NET Core 8 Web API, C#, Entity Framework Core 9 |
 | **Database** | PostgreSQL on Supabase (Npgsql) |
-| **Message Queue & Cache** | Upstash Redis Distributed Queue (`LPUSH`/`RPOP`) + Distributed Cache |
+| **Message Queue & Cache** | Upstash Redis Distributed Reliable Queue (`LPUSH`/`BRPOP`/`BRPOPLPUSH` with Processing List & Zero Data Loss) + Distributed Cache |
 | **Document Generation** | QuestPDF (PDF Statements), ClosedXML (Excel Reports) |
 | **Media Hosting** | Cloudinary DotNet API |
 | **Real-time Engine** | Server-Sent Events (SSE) `/api/events/stream` |

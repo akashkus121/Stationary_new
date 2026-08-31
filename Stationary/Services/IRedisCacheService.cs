@@ -15,6 +15,11 @@ namespace Stationary.Services
         // Message Queue Operations (Upstash Redis + Fallback)
         Task<long> EnqueueAsync<T>(string queueName, T item);
         Task<T?> DequeueAsync<T>(string queueName);
+        Task<T?> BlockingDequeueAsync<T>(string queueName, TimeSpan? timeout = null);
+        Task<T?> DequeueWithReliableProcessingAsync<T>(string sourceQueue, string processingQueue, TimeSpan? timeout = null);
+        Task<bool> AcknowledgeAsync<T>(string processingQueue, T item);
+        Task<long> RequeueFailedAsync<T>(string processingQueue, string sourceQueue, T item);
+        Task<long> RecoverProcessingQueueAsync<T>(string processingQueue, string sourceQueue);
         Task<List<T>> GetQueueItemsAsync<T>(string queueName, int start = 0, int stop = -1);
         Task<long> GetQueueLengthAsync(string queueName);
     }
