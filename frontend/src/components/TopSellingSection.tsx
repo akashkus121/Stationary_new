@@ -14,10 +14,11 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'next' | 'prev'>('next');
   const [loadingAction, setLoadingAction] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
-  // Take top 6 products for the sliding showcase
+  // Take top 6 visible products
   const topProducts = products.filter(p => p.isVisible !== false).slice(0, 6);
 
   // Auto-play sliding every 4.5 seconds
@@ -25,6 +26,7 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
     if (topProducts.length <= 1 || isPaused) return;
 
     const timer = setInterval(() => {
+      setSlideDirection('next');
       setCurrentIndex((prev) => (prev + 1) % topProducts.length);
     }, 4500);
 
@@ -34,13 +36,18 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
   if (topProducts.length === 0) return null;
 
   const currentProduct = topProducts[currentIndex];
+  const itemInCart = cart?.items.find((item) => item.productId === currentProduct.id);
+  const itemQty = itemInCart ? itemInCart.quantity : 0;
   const isOutOfStock = currentProduct.stockQuantity <= 0 || currentProduct.isOutOfStock;
+  const isLowStock = !isOutOfStock && (currentProduct.stockQuantity <= currentProduct.lowStockThreshold || currentProduct.isLowStock);
 
   const handlePrev = () => {
+    setSlideDirection('prev');
     setCurrentIndex((prev) => (prev === 0 ? topProducts.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
+    setSlideDirection('next');
     setCurrentIndex((prev) => (prev + 1) % topProducts.length);
   };
 
@@ -107,6 +114,7 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Header Bar with Title & Controls */}
       <div className="section-header-row">
         <div className="section-header-left">
           <div className="section-badge-pill">
@@ -144,124 +152,111 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
         </div>
       </div>
 
-      {/* Single Sliding Showcase (1 Item at a Time) */}
-      <div className="single-slide-showcase-container">
+      {/* Guaranteed 100% Full-Width Spotlight Showcase */}
+      <div className="spotlight-showcase-wrapper">
         <div 
-          className="single-slide-track"
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          key={currentProduct.id} 
+          className={`spotlight-card slide-anim-${slideDirection}`}
         >
-          {topProducts.map((product, idx) => {
-            const itemInCart = cart?.items.find((item) => item.productId === product.id);
-            const itemQty = itemInCart ? itemInCart.quantity : 0;
-            const itemOutOfStock = product.stockQuantity <= 0 || product.isOutOfStock;
-            const itemLowStock = !itemOutOfStock && (product.stockQuantity <= product.lowStockThreshold || product.isLowStock);
+          {/* Left Column (70% Width): Edge-to-Edge Full Screen Product Photo */}
+          <div className="spotlight-image-col">
+            <div className="spotlight-rank-tag">
+              <Sparkles size={13} /> #{currentIndex + 1} Best Seller
+            </div>
+            <img 
+              src={currentProduct.imagePath || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=85'} 
+              alt={currentProduct.name} 
+              className="spotlight-hero-img"
+            />
+            <div className="spotlight-img-overlay"></div>
+          </div>
 
-            return (
-              <div key={product.id} className="single-slide-item">
-                <div className="spotlight-card">
-                  {/* Left Column: Big Product Image */}
-                  <div className="spotlight-image-col">
-                    <div className="spotlight-rank-tag">
-                      <Sparkles size={13} /> #{idx + 1} Best Seller
-                    </div>
-                    <img 
-                      src={product.imagePath || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80'} 
-                      alt={product.name} 
-                      className="spotlight-hero-img"
-                    />
-                    <div className="spotlight-img-overlay"></div>
-                  </div>
+          {/* Right Column (30% Width): Rich Details & Interactive Action */}
+          <div className="spotlight-content-col">
+            <div className="spotlight-meta-top">
+              <span className="spotlight-category-chip">{currentProduct.category}</span>
+              {isOutOfStock ? (
+                <span className="spotlight-stock-badge out-of-stock">
+                  <XCircle size={13} /> Sold Out
+                </span>
+              ) : isLowStock ? (
+                <span className="spotlight-stock-badge low-stock">
+                  <AlertTriangle size={13} /> Only {currentProduct.stockQuantity} Left
+                </span>
+              ) : (
+                <span className="spotlight-stock-badge in-stock">
+                  <CheckCircle2 size={13} /> In Stock ({currentProduct.stockQuantity} Units)
+                </span>
+              )}
+            </div>
 
-                  {/* Right Column: Rich Info & Interactive Action */}
-                  <div className="spotlight-content-col">
-                    <div className="spotlight-meta-top">
-                      <span className="spotlight-category-chip">{product.category}</span>
-                      {itemOutOfStock ? (
-                        <span className="spotlight-stock-badge out-of-stock">
-                          <XCircle size={13} /> Sold Out
-                        </span>
-                      ) : itemLowStock ? (
-                        <span className="spotlight-stock-badge low-stock">
-                          <AlertTriangle size={13} /> Only {product.stockQuantity} Left
-                        </span>
-                      ) : (
-                        <span className="spotlight-stock-badge in-stock">
-                          <CheckCircle2 size={13} /> In Stock ({product.stockQuantity} Units)
-                        </span>
-                      )}
-                    </div>
+            <h3 className="spotlight-title">{currentProduct.name}</h3>
+            
+            <p className="spotlight-description">
+              {currentProduct.description || 'Precision handcrafted stationery crafted from archival grade materials for seamless writing and desk productivity.'}
+            </p>
 
-                    <h3 className="spotlight-title">{product.name}</h3>
-                    
-                    <p className="spotlight-description">
-                      {product.description || 'Precision handcrafted stationery crafted from archival grade materials for seamless writing and desk productivity.'}
-                    </p>
-
-                    <div className="spotlight-pricing-row">
-                      <div className="spotlight-price-box">
-                        <span className="spotlight-price-label">Price</span>
-                        <span className="spotlight-price-val">Rs. {product.price.toFixed(2)}</span>
-                      </div>
-                      <div className="spotlight-verified-pill">
-                        <TrendingUp size={14} /> Top Pick this Week
-                      </div>
-                    </div>
-
-                    {/* Add to Cart / Stepper */}
-                    <div className="spotlight-actions-row">
-                      {itemQty > 0 ? (
-                        <div className="spotlight-stepper-box">
-                          <button
-                            className="spotlight-stepper-btn minus"
-                            onClick={() => handleUpdateQty(itemQty - 1)}
-                            disabled={loadingAction}
-                            aria-label="Decrease Quantity"
-                          >
-                            <Minus size={16} />
-                          </button>
-                          <span className="spotlight-stepper-value">
-                            {loadingAction ? <Loader2 size={16} className="spin-icon" /> : itemQty}
-                          </span>
-                          <button
-                            className="spotlight-stepper-btn plus"
-                            onClick={() => handleUpdateQty(itemQty + 1)}
-                            disabled={loadingAction || itemQty >= product.stockQuantity}
-                            aria-label="Increase Quantity"
-                          >
-                            <Plus size={16} />
-                          </button>
-                          <span className="spotlight-in-cart-label">In Your Cart</span>
-                        </div>
-                      ) : (
-                        <button
-                          className="btn-spotlight-add-cart"
-                          onClick={handleAddToCart}
-                          disabled={itemOutOfStock || loadingAction}
-                        >
-                          {loadingAction ? (
-                            <>
-                              <Loader2 size={18} className="spin-icon" />
-                              <span>Adding to Cart...</span>
-                            </>
-                          ) : itemOutOfStock ? (
-                            <>
-                              <XCircle size={18} />
-                              <span>Currently Sold Out</span>
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingCart size={18} />
-                              <span>Add to Bag • Rs. {product.price.toFixed(2)}</span>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            <div className="spotlight-pricing-row">
+              <div className="spotlight-price-box">
+                <span className="spotlight-price-label">Price</span>
+                <span className="spotlight-price-val">Rs. {currentProduct.price.toFixed(2)}</span>
               </div>
-            );
-          })}
+              <div className="spotlight-verified-pill">
+                <TrendingUp size={14} /> Top Pick
+              </div>
+            </div>
+
+            {/* Add to Cart / Quantity Stepper */}
+            <div className="spotlight-actions-row">
+              {itemQty > 0 ? (
+                <div className="spotlight-stepper-box">
+                  <button
+                    className="spotlight-stepper-btn minus"
+                    onClick={() => handleUpdateQty(itemQty - 1)}
+                    disabled={loadingAction}
+                    aria-label="Decrease Quantity"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="spotlight-stepper-value">
+                    {loadingAction ? <Loader2 size={16} className="spin-icon" /> : itemQty}
+                  </span>
+                  <button
+                    className="spotlight-stepper-btn plus"
+                    onClick={() => handleUpdateQty(itemQty + 1)}
+                    disabled={loadingAction || itemQty >= currentProduct.stockQuantity}
+                    aria-label="Increase Quantity"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <span className="spotlight-in-cart-label">In Bag</span>
+                </div>
+              ) : (
+                <button
+                  className="btn-spotlight-add-cart"
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock || loadingAction}
+                >
+                  {loadingAction ? (
+                    <>
+                      <Loader2 size={18} className="spin-icon" />
+                      <span>Adding to Bag...</span>
+                    </>
+                  ) : isOutOfStock ? (
+                    <>
+                      <XCircle size={18} />
+                      <span>Sold Out</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart size={18} />
+                      <span>Add to Bag • Rs. {currentProduct.price.toFixed(2)}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Carousel Indicator Dots */}
@@ -270,7 +265,10 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
             <button
               key={dotIdx}
               className={`indicator-dot ${dotIdx === currentIndex ? 'active' : ''}`}
-              onClick={() => setCurrentIndex(dotIdx)}
+              onClick={() => {
+                setSlideDirection(dotIdx > currentIndex ? 'next' : 'prev');
+                setCurrentIndex(dotIdx);
+              }}
               aria-label={`Go to slide ${dotIdx + 1}`}
             />
           ))}
