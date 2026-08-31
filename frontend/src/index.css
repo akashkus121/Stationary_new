@@ -6002,73 +6002,74 @@ body {
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-  min-height: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  min-height: 440px;
 }
 
-/* Left Image Column */
+/* Left Image Column (Edge-to-Edge Full Grid Image) */
 .spotlight-image-col {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 400px;
-  background: #f8fafc;
+  min-height: 440px;
+  background: #f1f5f9;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .spotlight-hero-img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  min-height: 400px;
+  min-height: 440px;
   object-fit: cover;
+  object-position: center;
   display: block;
   transition: transform 0.6s ease;
 }
 
 .spotlight-card:hover .spotlight-hero-img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .spotlight-img-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, transparent 75%, rgba(255, 255, 255, 0.3) 100%),
-              linear-gradient(to top, rgba(15, 23, 42, 0.2) 0%, transparent 40%);
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.25) 0%, transparent 40%);
   pointer-events: none;
 }
 
 .spotlight-rank-tag {
   position: absolute;
-  top: 18px;
-  left: 18px;
+  top: 20px;
+  left: 20px;
   z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
   border-radius: 9999px;
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.88);
   border: 1px solid #f59e0b;
   color: #fbbf24;
   font-size: 0.78rem;
   font-weight: 700;
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
 }
 
 /* Right Content Column */
 .spotlight-content-col {
-  padding: 36px 42px;
+  padding: 40px 48px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 16px;
+  gap: 18px;
   background: #ffffff;
   box-sizing: border-box;
   width: 100%;
+  height: 100%;
 }
 
 .spotlight-meta-top {
@@ -6288,12 +6289,15 @@ body {
   }
 
   .spotlight-image-col {
+    position: relative;
     min-height: 280px;
     max-height: 300px;
   }
 
   .spotlight-hero-img {
+    position: relative;
     min-height: 280px;
+    height: 280px;
   }
 
   .spotlight-content-col {
@@ -6334,6 +6338,7 @@ body {
 
   .spotlight-hero-img {
     min-height: 220px;
+    height: 220px;
   }
 
   .spotlight-content-col {
@@ -6407,12 +6412,12 @@ body {
   width: fit-content;
 }
 
-/* Status Toggle Pill for Visibility */
+/* Status Toggle Pill for Visibility (Green Active / Red Disabled) */
 .status-toggle-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 9999px;
   font-size: 0.76rem;
   font-weight: 700;
@@ -6422,27 +6427,29 @@ body {
 }
 
 .status-toggle-pill.is-active {
-  background: rgba(16, 185, 129, 0.14);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border: 1px solid #047857 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
 }
 
 .status-toggle-pill.is-active:hover {
-  background: rgba(16, 185, 129, 0.25);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5) !important;
 }
 
 .status-toggle-pill.is-hidden {
-  background: rgba(239, 68, 68, 0.14);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #f87171;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: 1px solid #b91c1c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
 }
 
 .status-toggle-pill.is-hidden:hover {
-  background: rgba(239, 68, 68, 0.25);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.55) !important;
 }
 
 .status-toggle-pill .toggle-dot {
