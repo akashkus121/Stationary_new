@@ -362,194 +362,14 @@ body {
 /* ==========================================================================
    Catalog Page & Filter Bar (Light Theme)
    ========================================================================== */
+/* ==========================================================================
+   Catalog Page Layout
+   ========================================================================== */
 .catalog-page {
   display: flex;
   flex-direction: column;
   gap: 24px;
-}
-
-/* ==========================================================================
-   Top Selling Section (Static Best Sellers Showcase - No Sliding Images)
-   ========================================================================== */
-.top-selling-section {
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 24px 26px 28px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.section-header-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.section-header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.section-badge-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #b45309;
-  background: #fef3c7;
-  border: 1px solid #fde68a;
-  padding: 3px 9px;
-  border-radius: var(--radius-full);
-  width: fit-content;
-  margin-bottom: 2px;
-}
-
-.flame-icon {
-  color: #d97706;
-}
-
-.section-heading {
-  font-family: var(--font-heading);
-  font-size: 1.55rem;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: -0.02em;
-}
-
-.section-subheading {
-  font-size: 0.86rem;
-  color: var(--text-muted);
-  max-width: 540px;
-}
-
-.live-popularity-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #059669;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-}
-
-.top-selling-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
   width: 100%;
-}
-
-.top-selling-card-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.top-selling-card-wrapper .product-card {
-  height: 100%;
-  border-radius: var(--radius-lg);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
-}
-
-.top-selling-card-wrapper:hover .product-card {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.1);
-  border-color: #a5b4fc;
-}
-
-.top-selling-rank-badge {
-  position: absolute;
-  top: -8px;
-  right: 12px;
-  z-index: 15;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: #ffffff;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  padding: 3px 9px;
-  border-radius: var(--radius-full);
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
-  border: 1.5px solid #ffffff;
-  pointer-events: none;
-}
-
-/* Tablet Breakpoint: 2x2 Grid (Balanced for 4 products) */
-@media (max-width: 1024px) {
-  .top-selling-section {
-    padding: 20px 20px 24px;
-    border-radius: 18px;
-  }
-
-  .top-selling-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-  }
-
-  .section-heading {
-    font-size: 1.35rem;
-  }
-}
-
-/* Mobile Breakpoint: 2-Column Compact Grid */
-@media (max-width: 640px) {
-  .top-selling-section {
-    padding: 16px 12px 18px;
-    border-radius: 14px;
-    gap: 14px;
-  }
-
-  .section-header-row {
-    padding-bottom: 10px;
-    gap: 8px;
-  }
-
-  .section-heading {
-    font-size: 1.15rem;
-  }
-
-  .section-subheading {
-    font-size: 0.78rem;
-  }
-
-  .live-popularity-tag {
-    display: none;
-  }
-
-  .top-selling-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .top-selling-rank-badge {
-    font-size: 0.6rem;
-    padding: 2px 6px;
-    right: 6px;
-    top: -6px;
-  }
-}
-
-/* Small Mobile Breakpoint (< 360px) */
-@media (max-width: 360px) {
-  .top-selling-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
 }
 
 /* ==========================================================================
@@ -5377,18 +5197,6 @@ body {
     width: 100%;
   }
 
-  .top-selling-section {
-    padding: 14px 8px 16px;
-    border-radius: 12px;
-    gap: 12px;
-  }
-
-  .top-selling-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    width: 100%;
-  }
-
   .brand-title {
     font-size: 1.15rem;
   }
@@ -5554,14 +5362,8 @@ body {
     display: none;
   }
 
-  .top-selling-section {
-    padding: 12px 6px 14px;
-    border-radius: 10px;
-  }
-
   .product-grid,
-  .products-grid,
-  .top-selling-grid {
+  .products-grid {
     gap: 6px;
   }
 
@@ -6050,11 +5852,13 @@ body {
 }
 
 /* =====================================================================
-   TOP SELLING SECTION: 1-AT-A-TIME SLIDING CAROUSEL (THEME COMPATIBLE)
+   TOP SELLING SECTION: 1-AT-A-TIME SLIDING CAROUSEL (RESPONSIVE FULL-WIDTH)
    ===================================================================== */
 .top-selling-section {
   position: relative;
-  margin-bottom: 40px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 36px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 24px;
   padding: 32px 36px;
@@ -6068,8 +5872,8 @@ body {
   position: absolute;
   top: -100px;
   right: -100px;
-  width: 320px;
-  height: 320px;
+  width: 340px;
+  height: 340px;
   background: radial-gradient(circle, rgba(79, 70, 229, 0.06) 0%, rgba(217, 119, 6, 0.05) 45%, transparent 70%);
   pointer-events: none;
   z-index: 0;
@@ -6083,6 +5887,7 @@ body {
   position: relative;
   z-index: 1;
   gap: 20px;
+  width: 100%;
 }
 
 .section-badge-pill {
@@ -6164,9 +5969,11 @@ body {
   font-weight: 700;
 }
 
-/* Container & Track */
+/* Container & Track (100% Full Width Carousel) */
 .single-slide-showcase-container {
   position: relative;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
   border-radius: 20px;
   z-index: 1;
@@ -6174,25 +5981,29 @@ body {
 
 .single-slide-track {
   display: flex;
-  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   width: 100%;
 }
 
 .single-slide-item {
   flex: 0 0 100%;
+  min-width: 100%;
+  max-width: 100%;
   width: 100%;
+  box-sizing: border-box;
 }
 
-/* Spotlight Card Layout */
+/* Spotlight Card Layout (Balanced 50/50 Grid) */
 .spotlight-card {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
   background: #ffffff;
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-  min-height: 380px;
+  min-height: 400px;
 }
 
 /* Left Image Column */
@@ -6200,34 +6011,39 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 380px;
+  min-height: 400px;
   background: #f8fafc;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .spotlight-hero-img {
   width: 100%;
   height: 100%;
+  min-height: 400px;
   object-fit: cover;
+  display: block;
   transition: transform 0.6s ease;
 }
 
 .spotlight-card:hover .spotlight-hero-img {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .spotlight-img-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, transparent 70%, rgba(255, 255, 255, 0.4) 100%),
+  background: linear-gradient(to right, transparent 75%, rgba(255, 255, 255, 0.3) 100%),
               linear-gradient(to top, rgba(15, 23, 42, 0.2) 0%, transparent 40%);
   pointer-events: none;
 }
 
 .spotlight-rank-tag {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 18px;
+  left: 18px;
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -6245,12 +6061,14 @@ body {
 
 /* Right Content Column */
 .spotlight-content-col {
-  padding: 32px 36px;
+  padding: 36px 42px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 16px;
   background: #ffffff;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .spotlight-meta-top {
@@ -6262,7 +6080,7 @@ body {
 }
 
 .spotlight-category-chip {
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 6px;
   background: #f1f5f9;
   color: #475569;
@@ -6293,7 +6111,7 @@ body {
 }
 
 .spotlight-title {
-  font-size: 1.55rem;
+  font-size: 1.65rem;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.25;
@@ -6302,7 +6120,7 @@ body {
 }
 
 .spotlight-description {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: #64748b;
   line-height: 1.55;
   margin: 0;
@@ -6316,7 +6134,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 12px 18px;
   background: #f8fafc;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -6336,7 +6154,7 @@ body {
 }
 
 .spotlight-price-val {
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #d97706;
 }
@@ -6345,7 +6163,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #4f46e5;
 }
@@ -6463,15 +6281,19 @@ body {
 /* =====================================================================
    RESPONSIVE MEDIA QUERIES FOR SLIDING SHOWCASE
    ===================================================================== */
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .spotlight-card {
     grid-template-columns: 1fr;
     min-height: auto;
   }
 
   .spotlight-image-col {
-    min-height: 260px;
-    max-height: 280px;
+    min-height: 280px;
+    max-height: 300px;
+  }
+
+  .spotlight-hero-img {
+    min-height: 280px;
   }
 
   .spotlight-content-col {
@@ -6484,7 +6306,7 @@ body {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .section-header-row {
     flex-direction: column;
     align-items: flex-start;
@@ -6506,8 +6328,12 @@ body {
   }
 
   .spotlight-image-col {
-    min-height: 210px;
-    max-height: 220px;
+    min-height: 220px;
+    max-height: 230px;
+  }
+
+  .spotlight-hero-img {
+    min-height: 220px;
   }
 
   .spotlight-content-col {
@@ -6520,7 +6346,7 @@ body {
   }
 
   .spotlight-price-val {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
   }
 }
 
