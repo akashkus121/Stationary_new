@@ -6523,6 +6523,108 @@ body {
   }
 }
 
+/* =====================================================================
+   ADMIN: DISABLED / INVISIBLE PRODUCTS WITH EYE-OFF (CROSS) INDICATOR
+   ===================================================================== */
+.admin-row-disabled {
+  background: rgba(248, 113, 113, 0.04) !important;
+  border-left: 3px solid #f87171 !important;
+}
+
+.table-product-thumb-box {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-product-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.table-product-thumb.thumb-is-disabled {
+  filter: grayscale(80%) brightness(0.65);
+  opacity: 0.7;
+}
+
+.thumb-cross-eye-badge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.65);
+  color: #f87171;
+  backdrop-filter: blur(2px);
+}
+
+.disabled-badge-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  font-size: 0.72rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+/* Status Toggle Pill for Visibility */
+.status-toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.status-toggle-pill.is-active {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}
+
+.status-toggle-pill.is-active:hover {
+  background: rgba(16, 185, 129, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.status-toggle-pill.is-hidden {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.status-toggle-pill.is-hidden:hover {
+  background: rgba(239, 68, 68, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.status-toggle-pill .toggle-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 
 
 

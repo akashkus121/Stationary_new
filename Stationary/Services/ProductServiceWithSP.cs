@@ -18,8 +18,13 @@ namespace Stationary.Services
             return await _db.Products.AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetAvailableProductsAsync(bool includeOutOfStock = false)
+        public async Task<IEnumerable<Product>> GetAvailableProductsAsync(bool includeOutOfStock = false, bool includeHidden = false)
         {
+            if (includeHidden)
+                return includeOutOfStock 
+                    ? await _db.Products.AsNoTracking().ToListAsync()
+                    : await _db.Products.AsNoTracking().Where(p => p.StockQuantity > 0).ToListAsync();
+
             if (includeOutOfStock)
                 return await _db.Products.AsNoTracking().Where(p => p.IsVisible).ToListAsync();
             

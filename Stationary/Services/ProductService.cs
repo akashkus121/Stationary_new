@@ -190,9 +190,9 @@ namespace Stationary.Services
             }
         }
 
-        public async Task<IEnumerable<Product>> GetAvailableProductsAsync(bool includeOutOfStock = false)
+        public async Task<IEnumerable<Product>> GetAvailableProductsAsync(bool includeOutOfStock = false, bool includeHidden = false)
         {
-            var cacheKey = $"products:available:{includeOutOfStock}";
+            var cacheKey = $"products:available:{includeOutOfStock}:{includeHidden}";
             var cached = await _cache.GetAsync<List<Product>>(cacheKey);
             if (cached != null)
             {
@@ -200,7 +200,13 @@ namespace Stationary.Services
             }
 
             List<Product> products;
-            if (includeOutOfStock)
+            if (includeHidden)
+            {
+                products = includeOutOfStock
+                    ? await _db.Products.AsNoTracking().ToListAsync()
+                    : await _db.Products.AsNoTracking().Where(p => p.StockQuantity > 0).ToListAsync();
+            }
+            else if (includeOutOfStock)
             {
                 products = await _db.Products.AsNoTracking().Where(p => p.IsVisible).ToListAsync();
             }

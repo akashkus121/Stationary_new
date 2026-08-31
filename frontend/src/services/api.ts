@@ -149,6 +149,7 @@ export const api = {
     search?: string;
     category?: string;
     stockFilter?: string;
+    includeHidden?: boolean;
     page?: number;
     pageSize?: number;
   }) {
@@ -156,20 +157,25 @@ export const api = {
     if (params?.search) query.append('search', params.search);
     if (params?.category) query.append('category', params.category);
     if (params?.stockFilter) query.append('stockFilter', params.stockFilter);
+    if (params?.includeHidden) query.append('includeHidden', 'true');
     if (params?.page) query.append('page', params.page.toString());
     if (params?.pageSize) query.append('pageSize', params.pageSize.toString());
 
     const cacheKey = query.toString();
     const cached = this._catalogCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < 30000) {
+    if (cached && Date.now() - cached.timestamp < 30000 && !params?.includeHidden) {
       return cached.data;
     }
 
-    const res = await fetch(`${API_BASE_URL}/productsapi?${query.toString()}`);
+    const res = await fetch(`${API_BASE_URL}/productsapi?${query.toString()}`, {
+      headers: getHeaders(),
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to fetch products.');
 
-    this._catalogCache.set(cacheKey, { data, timestamp: Date.now() });
+    if (!params?.includeHidden) {
+      this._catalogCache.set(cacheKey, { data, timestamp: Date.now() });
+    }
     return data;
   },
 

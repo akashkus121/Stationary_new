@@ -92,15 +92,20 @@ namespace Stationary.Controllers
             [FromQuery] string? search,
             [FromQuery] string? category,
             [FromQuery] string stockFilter = "available",
+            [FromQuery] bool? includeHidden = false,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 12)
         {
+            var user = await GetCurrentAuthUserAsync();
+            bool isAdmin = user != null && string.Equals(user.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+            bool shouldIncludeHidden = (includeHidden == true) || (isAdmin && string.Equals(stockFilter, "all", StringComparison.OrdinalIgnoreCase)) || (string.Equals(stockFilter, "all", StringComparison.OrdinalIgnoreCase));
+
             IEnumerable<Product> products;
 
             switch (stockFilter?.ToLower())
             {
                 case "all":
-                    products = await _productService.GetAvailableProductsAsync(true);
+                    products = await _productService.GetAvailableProductsAsync(true, shouldIncludeHidden);
                     break;
                 case "outofstock":
                     products = await _productService.GetOutOfStockProductsAsync();
@@ -109,7 +114,7 @@ namespace Stationary.Controllers
                     products = await _productService.GetLowStockProductsAsync();
                     break;
                 default:
-                    products = await _productService.GetAvailableProductsAsync(false);
+                    products = await _productService.GetAvailableProductsAsync(false, false);
                     break;
             }
 

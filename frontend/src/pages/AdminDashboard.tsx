@@ -108,11 +108,11 @@ export const AdminDashboard: React.FC = () => {
   const [ocrResult, setOcrResult] = useState<any | null>(null);
   const [ocrLoading, setOcrLoading] = useState(false);
 
-  // Fetch Products
+  // Fetch Products (Including Disabled/Hidden Products with EyeOff icon)
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await api.getProducts({ search, category, stockFilter: 'all', pageSize: 100 });
+      const res = await api.getProducts({ search, category, stockFilter: 'all', includeHidden: true, pageSize: 100 });
       setProducts(res.products || []);
     } catch (err: any) {
       setAlertMsg({ type: 'error', text: err.message || 'Failed to load products.' });
@@ -682,6 +682,7 @@ export const AdminDashboard: React.FC = () => {
                 </thead>
                 <tbody>
                   {products.map((p) => {
+                    const isProductVisible = p.isVisible !== false;
                     const imgUrl = (p.imagePath && p.imagePath.trim() !== '')
                       ? (p.imagePath.startsWith('http://') || p.imagePath.startsWith('https://')
                           ? p.imagePath
@@ -689,21 +690,35 @@ export const AdminDashboard: React.FC = () => {
                       : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100';
 
                     return (
-                      <tr key={p.id}>
+                      <tr key={p.id} className={!isProductVisible ? 'admin-row-disabled' : ''}>
                         <td><span className="sku-tag">#{p.id}</span></td>
                         <td>
                           <div className="table-product-thumb-box">
                             <img
                               src={imgUrl}
                               alt={p.name}
-                              className="table-product-thumb"
+                              className={`table-product-thumb ${!isProductVisible ? 'thumb-is-disabled' : ''}`}
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100';
                               }}
                             />
+                            {!isProductVisible && (
+                              <div className="thumb-cross-eye-badge" title="Item is Disabled / Hidden from Customers">
+                                <EyeOff size={14} />
+                              </div>
+                            )}
                           </div>
                         </td>
-                        <td className="product-title-cell"><strong>{p.name}</strong></td>
+                        <td className="product-title-cell">
+                          <div className="flex flex-col gap-1">
+                            <strong className={!isProductVisible ? 'text-muted' : ''}>{p.name}</strong>
+                            {!isProductVisible && (
+                              <span className="disabled-badge-inline">
+                                <EyeOff size={11} /> Disabled (Hidden from Storefront)
+                              </span>
+                            )}
+                          </div>
+                        </td>
                         <td><span className="cat-pill">{p.category}</span></td>
                         <td><strong className="text-primary">Rs. {Number(p.price).toFixed(2)}</strong></td>
                         <td>
@@ -712,7 +727,11 @@ export const AdminDashboard: React.FC = () => {
                           </strong>
                         </td>
                         <td>
-                          {p.stockQuantity <= 0 ? (
+                          {!isProductVisible ? (
+                            <span className="badge badge-danger">
+                              <EyeOff size={12} /> Disabled
+                            </span>
+                          ) : p.stockQuantity <= 0 ? (
                             <span className="badge badge-danger">Out of Stock</span>
                           ) : p.stockQuantity <= p.lowStockThreshold ? (
                             <span className="badge badge-warning">Low Stock ({p.stockQuantity})</span>
@@ -721,17 +740,19 @@ export const AdminDashboard: React.FC = () => {
                           )}
                         </td>
                         <td>
-                          {/* Toggle to show/hide item to users */}
+                          {/* Toggle to show/hide item to users with Eye and EyeOff (Eye with Cross) */}
                           <button
                             type="button"
-                            className={`status-toggle-pill ${p.isVisible ? 'is-active' : 'is-hidden'}`}
+                            className={`status-toggle-pill ${isProductVisible ? 'is-active' : 'is-hidden'}`}
                             onClick={() => handleToggleVisibility(p.id)}
-                            title={`Click to ${p.isVisible ? 'Hide from' : 'Show to'} users in storefront`}
+                            title={`Click to ${isProductVisible ? 'Disable/Hide from' : 'Enable/Show to'} customers in storefront`}
                           >
                             <span className="toggle-dot">
-                              {p.isVisible ? <Eye size={11} /> : <EyeOff size={11} />}
+                              {isProductVisible ? <Eye size={12} /> : <EyeOff size={12} />}
                             </span>
-                            <span className="toggle-label-text">{p.isVisible ? 'Visible (Shown)' : 'Hidden (Private)'}</span>
+                            <span className="toggle-label-text">
+                              {isProductVisible ? 'Visible (Stock ON)' : 'Disabled (Stock OFF)'}
+                            </span>
                           </button>
                         </td>
                         <td>
