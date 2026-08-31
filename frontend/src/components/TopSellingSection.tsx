@@ -108,170 +108,158 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
 
   return (
     <section 
-      className="top-selling-section"
+      className="top-selling-unified-banner"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Header Bar with Title & Controls */}
-      <div className="section-header-row">
-        <div className="section-header-left">
-          <div className="section-badge-pill">
-            <Flame size={14} className="flame-icon" />
-            <span>Studio Bestsellers</span>
-          </div>
-          <h2 className="section-heading">Top Selling Stationery</h2>
-          <p className="section-subheading">
-            Featured spotlight on our most sought-after precision instruments and archival essentials.
-          </p>
+      {/* 70% Left Column: Full Edge-to-Edge Product Image */}
+      <div className="unified-image-panel">
+        <div className="unified-rank-tag">
+          <Sparkles size={13} /> #{currentIndex + 1} Best Seller
         </div>
+        <img 
+          key={currentProduct.id}
+          src={currentProduct.imagePath || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=85'} 
+          alt={currentProduct.name} 
+          className={`unified-hero-img slide-anim-${slideDirection}`}
+        />
+        <div className="unified-img-overlay"></div>
+      </div>
 
-        <div className="section-header-right">
-          <div className="slider-nav-arrows">
+      {/* 30% Right Column: Header, Info, Controls & Actions */}
+      <div className="unified-details-panel">
+        {/* Top Header Row */}
+        <div className="unified-panel-header">
+          <div className="unified-badge-pill">
+            <Flame size={13} className="flame-icon" />
+            <span>Studio Bestseller</span>
+          </div>
+
+          <div className="unified-nav-controls">
             <button 
-              className="slider-nav-btn prev" 
+              className="unified-nav-btn prev" 
               onClick={handlePrev}
               aria-label="Previous Featured Product"
               title="Previous"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={16} />
             </button>
-            <span className="slider-counter">
-              <strong>0{currentIndex + 1}</strong> / 0{topProducts.length}
+            <span className="unified-counter">
+              <strong>0{currentIndex + 1}</strong>/0{topProducts.length}
             </span>
             <button 
-              className="slider-nav-btn next" 
+              className="unified-nav-btn next" 
               onClick={handleNext}
               aria-label="Next Featured Product"
               title="Next"
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Guaranteed 100% Full-Width Spotlight Showcase */}
-      <div className="spotlight-showcase-wrapper">
-        <div 
-          key={currentProduct.id} 
-          className={`spotlight-card slide-anim-${slideDirection}`}
-        >
-          {/* Left Column (70% Width): Edge-to-Edge Full Screen Product Photo */}
-          <div className="spotlight-image-col">
-            <div className="spotlight-rank-tag">
-              <Sparkles size={13} /> #{currentIndex + 1} Best Seller
-            </div>
-            <img 
-              src={currentProduct.imagePath || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=85'} 
-              alt={currentProduct.name} 
-              className="spotlight-hero-img"
-            />
-            <div className="spotlight-img-overlay"></div>
+        {/* Product Meta & Title */}
+        <div className="unified-product-body">
+          <div className="unified-meta-row">
+            <span className="unified-category-chip">{currentProduct.category}</span>
+            {isOutOfStock ? (
+              <span className="unified-stock-chip out-of-stock">
+                <XCircle size={12} /> Sold Out
+              </span>
+            ) : isLowStock ? (
+              <span className="unified-stock-chip low-stock">
+                <AlertTriangle size={12} /> Only {currentProduct.stockQuantity} Left
+              </span>
+            ) : (
+              <span className="unified-stock-chip in-stock">
+                <CheckCircle2 size={12} /> In Stock
+              </span>
+            )}
           </div>
 
-          {/* Right Column (30% Width): Rich Details & Interactive Action */}
-          <div className="spotlight-content-col">
-            <div className="spotlight-meta-top">
-              <span className="spotlight-category-chip">{currentProduct.category}</span>
-              {isOutOfStock ? (
-                <span className="spotlight-stock-badge out-of-stock">
-                  <XCircle size={13} /> Sold Out
-                </span>
-              ) : isLowStock ? (
-                <span className="spotlight-stock-badge low-stock">
-                  <AlertTriangle size={13} /> Only {currentProduct.stockQuantity} Left
-                </span>
-              ) : (
-                <span className="spotlight-stock-badge in-stock">
-                  <CheckCircle2 size={13} /> In Stock ({currentProduct.stockQuantity} Units)
-                </span>
-              )}
+          <h3 className="unified-product-title">{currentProduct.name}</h3>
+
+          <p className="unified-product-desc">
+            {currentProduct.description || 'Precision handcrafted stationery crafted from archival grade materials for seamless writing and desk productivity.'}
+          </p>
+
+          <div className="unified-pricing-box">
+            <div className="unified-price-stack">
+              <span className="unified-price-label">Price</span>
+              <span className="unified-price-num">Rs. {currentProduct.price.toFixed(2)}</span>
             </div>
-
-            <h3 className="spotlight-title">{currentProduct.name}</h3>
-            
-            <p className="spotlight-description">
-              {currentProduct.description || 'Precision handcrafted stationery crafted from archival grade materials for seamless writing and desk productivity.'}
-            </p>
-
-            <div className="spotlight-pricing-row">
-              <div className="spotlight-price-box">
-                <span className="spotlight-price-label">Price</span>
-                <span className="spotlight-price-val">Rs. {currentProduct.price.toFixed(2)}</span>
-              </div>
-              <div className="spotlight-verified-pill">
-                <TrendingUp size={14} /> Top Pick
-              </div>
-            </div>
-
-            {/* Add to Cart / Quantity Stepper */}
-            <div className="spotlight-actions-row">
-              {itemQty > 0 ? (
-                <div className="spotlight-stepper-box">
-                  <button
-                    className="spotlight-stepper-btn minus"
-                    onClick={() => handleUpdateQty(itemQty - 1)}
-                    disabled={loadingAction}
-                    aria-label="Decrease Quantity"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="spotlight-stepper-value">
-                    {loadingAction ? <Loader2 size={16} className="spin-icon" /> : itemQty}
-                  </span>
-                  <button
-                    className="spotlight-stepper-btn plus"
-                    onClick={() => handleUpdateQty(itemQty + 1)}
-                    disabled={loadingAction || itemQty >= currentProduct.stockQuantity}
-                    aria-label="Increase Quantity"
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <span className="spotlight-in-cart-label">In Bag</span>
-                </div>
-              ) : (
-                <button
-                  className="btn-spotlight-add-cart"
-                  onClick={handleAddToCart}
-                  disabled={isOutOfStock || loadingAction}
-                >
-                  {loadingAction ? (
-                    <>
-                      <Loader2 size={18} className="spin-icon" />
-                      <span>Adding to Bag...</span>
-                    </>
-                  ) : isOutOfStock ? (
-                    <>
-                      <XCircle size={18} />
-                      <span>Sold Out</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart size={18} />
-                      <span>Add to Bag • Rs. {currentProduct.price.toFixed(2)}</span>
-                    </>
-                  )}
-                </button>
-              )}
+            <div className="unified-top-pick-tag">
+              <TrendingUp size={13} /> Top Pick
             </div>
           </div>
         </div>
 
-        {/* Carousel Indicator Dots */}
-        <div className="slider-indicator-dots">
-          {topProducts.map((_, dotIdx) => (
+        {/* Action Button & Stepper */}
+        <div className="unified-action-container">
+          {itemQty > 0 ? (
+            <div className="unified-stepper-box">
+              <button
+                className="unified-stepper-btn minus"
+                onClick={() => handleUpdateQty(itemQty - 1)}
+                disabled={loadingAction}
+                aria-label="Decrease Quantity"
+              >
+                <Minus size={15} />
+              </button>
+              <span className="unified-stepper-val">
+                {loadingAction ? <Loader2 size={15} className="spin-icon" /> : itemQty}
+              </span>
+              <button
+                className="unified-stepper-btn plus"
+                onClick={() => handleUpdateQty(itemQty + 1)}
+                disabled={loadingAction || itemQty >= currentProduct.stockQuantity}
+                aria-label="Increase Quantity"
+              >
+                <Plus size={15} />
+              </button>
+              <span className="unified-in-cart-text">In Bag</span>
+            </div>
+          ) : (
             <button
-              key={dotIdx}
-              className={`indicator-dot ${dotIdx === currentIndex ? 'active' : ''}`}
-              onClick={() => {
-                setSlideDirection(dotIdx > currentIndex ? 'next' : 'prev');
-                setCurrentIndex(dotIdx);
-              }}
-              aria-label={`Go to slide ${dotIdx + 1}`}
-            />
-          ))}
+              className="btn-unified-add-cart"
+              onClick={handleAddToCart}
+              disabled={isOutOfStock || loadingAction}
+            >
+              {loadingAction ? (
+                <>
+                  <Loader2 size={16} className="spin-icon" />
+                  <span>Adding...</span>
+                </>
+              ) : isOutOfStock ? (
+                <>
+                  <XCircle size={16} />
+                  <span>Sold Out</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={16} />
+                  <span>Add to Bag • Rs. {currentProduct.price.toFixed(2)}</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Indicator Dots */}
+          <div className="unified-dots-row">
+            {topProducts.map((_, dotIdx) => (
+              <button
+                key={dotIdx}
+                className={`unified-dot ${dotIdx === currentIndex ? 'active' : ''}`}
+                onClick={() => {
+                  setSlideDirection(dotIdx > currentIndex ? 'next' : 'prev');
+                  setCurrentIndex(dotIdx);
+                }}
+                aria-label={`Go to slide ${dotIdx + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
