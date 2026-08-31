@@ -98,7 +98,7 @@ namespace Stationary.Controllers
             {
                 var outOfStockProducts = (await _productService.GetOutOfStockProductsAsync()).ToList();
                 var lowStockProducts = (await _productService.GetLowStockProductsAsync()).ToList();
-                var allProducts = (await _productService.GetAvailableProductsAsync(true)).ToList();
+                var allProducts = (await _productService.GetAvailableProductsAsync(includeOutOfStock: true, includeHidden: true)).ToList();
 
                 return Ok(new
                 {
@@ -185,17 +185,13 @@ namespace Stationary.Controllers
 
                 await _db.SaveChangesAsync();
 
-                // Non-blocking background sync
-                _ = Task.Run(async () =>
+                try
                 {
-                    try
-                    {
-                        await _redisCache.RemoveByPatternAsync("products:*");
-                        var all = await _db.Products.AsNoTracking().ToListAsync();
-                        await _fallbackQueue.SaveProductCacheAsync(all);
-                    }
-                    catch { }
-                });
+                    await _redisCache.RemoveByPatternAsync("products:*");
+                    var all = await _db.Products.AsNoTracking().ToListAsync();
+                    await _fallbackQueue.SaveProductCacheAsync(all);
+                }
+                catch { }
 
                 _eventStream.BroadcastEvent("stock_update", new
                 {

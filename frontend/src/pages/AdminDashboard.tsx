@@ -231,13 +231,29 @@ export const AdminDashboard: React.FC = () => {
   }, [fetchProducts, fetchAllOrders, fetchStockData, fetchSalesReport]);
 
   const handleToggleVisibility = async (id: number) => {
+    // 1. Optimistic immediate state update for 0ms visual delay
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, isVisible: p.isVisible === false ? true : false } : p))
+    );
+    setStockUpdates((prev) =>
+      prev.map((s) => (s.productId === id ? { ...s, isVisible: !s.isVisible } : s))
+    );
+
     try {
       const res = await api.toggleProductVisibility(id);
       setAlertMsg({ type: 'success', text: res.message });
-      fetchProducts();
-      fetchStockData();
+      if (typeof res.isVisible === 'boolean') {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, isVisible: res.isVisible } : p))
+        );
+        setStockUpdates((prev) =>
+          prev.map((s) => (s.productId === id ? { ...s, isVisible: res.isVisible } : s))
+        );
+      }
     } catch (err: any) {
       setAlertMsg({ type: 'error', text: err.message });
+      fetchProducts();
+      fetchStockData();
     }
   };
 
@@ -308,7 +324,25 @@ export const AdminDashboard: React.FC = () => {
       }));
       const res = await api.bulkUpdateStock(updatesToSend);
       setAlertMsg({ type: 'success', text: res.message || 'Inventory updated successfully!' });
+
+      // Synchronize optimistic state
+      setStockUpdates((prev) =>
+        prev.map((item) => ({
+          ...item,
+          origStockQuantity: item.newStockQuantity,
+          origLowStockThreshold: item.newLowStockThreshold,
+        }))
+      );
+      setProducts((prev) =>
+        prev.map((p) => {
+          const match = stockUpdates.find((u) => u.productId === p.id);
+          return match
+            ? { ...p, stockQuantity: match.newStockQuantity, lowStockThreshold: match.newLowStockThreshold }
+            : p;
+        })
+      );
       await fetchStockData();
+      await fetchProducts();
     } catch (err: any) {
       setAlertMsg({ type: 'error', text: err.message || 'Failed to update stock.' });
     } finally {

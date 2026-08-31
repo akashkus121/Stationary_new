@@ -16,19 +16,33 @@ namespace Stationary.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IEventStreamService _eventStream;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IRedisCacheService _redisCache;
 
         public ProductsController(
             ApplicationDbContext db,
             IProductService productService,
             IWebHostEnvironment webHostEnvironment,
             IEventStreamService eventStream,
-            ICloudinaryService cloudinaryService)
+            ICloudinaryService cloudinaryService,
+            IRedisCacheService redisCache)
         {
             _db = db;
             _productService = productService;
             _webHostEnvironment = webHostEnvironment;
             _eventStream = eventStream;
             _cloudinaryService = cloudinaryService;
+            _redisCache = redisCache;
+        }
+
+        private async Task InvalidateProductCachesAsync()
+        {
+            try
+            {
+                await _redisCache.RemoveByPatternAsync("products:*");
+                await _redisCache.RemoveAsync("products:all");
+                await _redisCache.RemoveAsync("products:categories");
+            }
+            catch { }
         }
 
         private async Task<User?> GetCurrentAuthUserAsync()
@@ -227,6 +241,7 @@ namespace Stationary.Controllers
 
             _db.Products.Add(product);
             await _db.SaveChangesAsync();
+            await InvalidateProductCachesAsync();
 
             _eventStream.BroadcastEvent("stock_update", new
             {
@@ -272,6 +287,7 @@ namespace Stationary.Controllers
             }
 
             await _db.SaveChangesAsync();
+            await InvalidateProductCachesAsync();
 
             _eventStream.BroadcastEvent("stock_update", new
             {
@@ -295,6 +311,7 @@ namespace Stationary.Controllers
 
             product.IsVisible = !product.IsVisible;
             await _db.SaveChangesAsync();
+            await InvalidateProductCachesAsync();
 
             _eventStream.BroadcastEvent("stock_update", new
             {
@@ -328,6 +345,7 @@ namespace Stationary.Controllers
 
             _db.Products.Remove(product);
             await _db.SaveChangesAsync();
+            await InvalidateProductCachesAsync();
 
             _eventStream.BroadcastEvent("stock_update", new
             {
