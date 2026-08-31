@@ -1,0 +1,223 @@
+import psycopg2
+import httpx
+import json
+
+CURATED_PRODUCTS = [
+    (
+        "Executive Leather Hardcover Notebook",
+        "Notebooks",
+        24.99,
+        85,
+        10,
+        True,
+        "Premium 120gsm ivory ruled paper journal with dual ribbon markers, expandable back pocket, and magnetic clasp.",
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Vintage Fountain Pen - Matte Black",
+        "Writing",
+        34.50,
+        50,
+        8,
+        True,
+        "Precision handcrafted brass barrel fountain pen with 24k gold-plated fine nib and piston ink converter included.",
+        "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Pastel Morandi Gel Pens (10-Pack)",
+        "Writing",
+        12.99,
+        150,
+        20,
+        True,
+        "0.5mm ultra-smooth quick-drying Japanese ink pens in aesthetic calming pastel tones. No bleed, no smear.",
+        "https://images.unsplash.com/photo-1585336261026-7f4153b6d773?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Dual-Sided Vegan Leather Desk Mat",
+        "Desk Accessories",
+        28.00,
+        40,
+        5,
+        True,
+        "Waterproof extended desk blotter (80x40cm) with non-slip backing. Smooth mouse glide surface for executive setups.",
+        "https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Pastel Sticky Notes Mega Cube (600 Sheets)",
+        "Desk Accessories",
+        8.50,
+        200,
+        25,
+        True,
+        "Self-adhesive repositionable memo notes cube in soft Nordic pastel hues for agile boards and note-taking.",
+        "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Artist Cotton Watercolor Sketchbook (A4)",
+        "Art Supplies",
+        26.50,
+        45,
+        6,
+        True,
+        "300gsm 100% cold-pressed cotton heavyweight paper. Lay-flat hardcover binding for gouache, watercolor, and ink.",
+        "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Dual-Tip Calligraphy Brush Pens (24 Colors)",
+        "Art Supplies",
+        38.00,
+        60,
+        10,
+        True,
+        "Flexible Japanese nylon brush tip on one end and 0.4mm fine fineliner on the other with blendable watercolor ink.",
+        "https://images.unsplash.com/photo-1568667256549-094345857637?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Heavy-Duty Ergonomic Desktop Stapler",
+        "Office Supplies",
+        16.75,
+        75,
+        12,
+        True,
+        "Reduced-effort 30-sheet capacity desktop stapler with all-metal inner mechanism, staple remover, and 1,000 staples.",
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Metallic Rose Gold Binder Clips (50-Pack)",
+        "Office Supplies",
+        7.99,
+        130,
+        20,
+        True,
+        "Rust-resistant tempered spring steel binder clips in luxury rose gold and brass champagne finishes.",
+        "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Aesthetic Pastel Chisel Highlighters (6-Pack)",
+        "Writing",
+        9.50,
+        160,
+        25,
+        True,
+        "Soft muted ink highlighters with dual-angle chisel tip that protects eyesight and prevents ink bleed-through.",
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Japanese Gold Foil Washi Tape (12 Rolls)",
+        "Crafts",
+        14.50,
+        90,
+        15,
+        True,
+        "Decorative natural fiber Japanese masking tape with gold foil accents for journaling, scrapbooking, and gifting.",
+        "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Precision Geometry Drafting Compass Kit",
+        "School Supplies",
+        11.25,
+        100,
+        15,
+        True,
+        "All-metal drafting compass, laser-etched stainless steel ruler, protractor, set squares, and lead refills in metal tin.",
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Dot Grid Spiral Hardcover Bullet Journal",
+        "Notebooks",
+        18.50,
+        95,
+        12,
+        True,
+        "160gsm ultra-thick bleed-proof dot grid pages with bronze twin-wire spiral binding and elastic privacy band.",
+        "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Vintage Brass Wax Seal Stamp & Melting Spoon Kit",
+        "Crafts",
+        21.99,
+        40,
+        5,
+        True,
+        "Solid brass tree-of-life seal stamp, rosewood handle, melting spoon, and 200 metallic octagonal wax beads.",
+        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Clear Acrylic Tiered Pen & Marker Organizer",
+        "Desk Accessories",
+        15.99,
+        65,
+        8,
+        True,
+        "Crystal clear acrylic 4-tier slanted desk caddy for pens, brushes, rulers, and scissors with silicone anti-slip feet.",
+        "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&auto=format&fit=crop&q=80"
+    ),
+    (
+        "Precision Titanium Craft Scissors (8-Inch)",
+        "School Supplies",
+        10.50,
+        110,
+        15,
+        True,
+        "Titanium-bonded stainless steel blades with soft-touch ergonomic grips for clean effortless cutting through cardstock and fabric.",
+        "https://images.unsplash.com/photo-1590736969955-71cc94801759?w=800&auto=format&fit=crop&q=80"
+    )
+]
+
+def main():
+    print("1. Connecting directly to Supabase PostgreSQL...")
+    conn = psycopg2.connect(
+        host="aws-0-ap-northeast-1.pooler.supabase.com",
+        port=5432,
+        dbname="postgres",
+        user="postgres.uzrfkqosqndjzkzgulrf",
+        password="Akash@875669",
+        sslmode="require"
+    )
+    conn.autocommit = True
+    cur = conn.cursor()
+
+    print("2. Cleaning old cart items, order items, and products...")
+    cur.execute('DELETE FROM "Carts";')
+    cur.execute('DELETE FROM "OrderItems";')
+    cur.execute('DELETE FROM "Orders";')
+    cur.execute('DELETE FROM "Products";')
+    cur.execute('ALTER SEQUENCE "Products_Id_seq" RESTART WITH 1;')
+
+    print("3. Inserting 16 curated high-definition stationery products...")
+    insert_sql = """
+        INSERT INTO "Products" 
+        ("Name", "Category", "Price", "StockQuantity", "LowStockThreshold", "IsVisible", "Description", "ImagePath", "IsActive", "CreatedDate")
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, true, NOW())
+    """
+    for p in CURATED_PRODUCTS:
+        cur.execute(insert_sql, p)
+        print(f"   + [DB Inserted] {p[0]} (${p[2]}) in {p[1]}")
+
+    cur.close()
+    conn.close()
+    print("   PostgreSQL database successfully updated!")
+
+    print("\n4. Purging Upstash Redis Cache...")
+    rest_url = "https://striking-titmouse-129181.upstash.io"
+    token = "gQAAAAAAAfidAAIgcDFkMTk5MmM2ZGRjYjI0MGIzYjA4ZWM0MmU1YjFjNTk1Mw"
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    # Flush Redis
+    flush_res = httpx.post(f"{rest_url}/flushdb", headers=headers)
+    print("   Redis FLUSHDB response:", flush_res.text)
+
+    print("\n5. Verifying live API catalog output...")
+    res = httpx.get("https://stationary-new-1.onrender.com/api/productsapi?pageSize=50")
+    if res.is_success:
+        data = res.json()
+        prods = data.get("products", [])
+        print(f"   Total Live Products: {len(prods)}")
+        for p in prods:
+            print(f"   ID #{p['id']} | [{p['category']}] {p['name']} - ${p['price']} | Stock: {p['stockQuantity']}")
+    
+    print("\nALL DONE! The stationery store has been refreshed with beautiful, high-definition products!")
+
+if __name__ == "__main__":
+    main()
