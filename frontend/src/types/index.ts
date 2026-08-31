@@ -55,6 +55,7 @@ export interface Order {
   date: string;
   totalAmount: number;
   paymentMethod: string;
+  orderStatus?: string;
   itemCount?: number;
   items: OrderItem[];
 }

@@ -431,6 +431,7 @@ namespace Stationary.Controllers
                     date = o.Date,
                     totalAmount = o.TotalAmount,
                     paymentMethod = o.PaymentMethod,
+                    orderStatus = string.IsNullOrWhiteSpace(o.OrderStatus) ? "Pending" : o.OrderStatus,
                     itemCount = itemsToShow?.Sum(i => i.Quantity) ?? 0,
                     items = itemsToShow?.Select(i => new
                     {
@@ -445,6 +446,48 @@ namespace Stationary.Controllers
             });
 
             return Ok(result);
+        }
+
+        public class UpdateOrderStatusDto
+        {
+            public string Status { get; set; } = "Ready";
+            public string? Notes { get; set; }
+        }
+
+        [HttpPut("update-status/{id}")]
+        [HttpPost("update-status/{id}")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDto dto)
+        {
+            var user = await GetCurrentAuthUserAsync();
+            if (user == null || !string.Equals(user.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+                return Unauthorized(new { message = "Admin authorization required." });
+
+            var order = await _db.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.Id == id);
+            if (order == null)
+                return NotFound(new { message = "Order not found." });
+
+            var newStatus = string.IsNullOrWhiteSpace(dto?.Status) ? "Ready" : dto.Status.Trim();
+            order.OrderStatus = newStatus;
+            order.UpdatedDate = DateTime.UtcNow;
+            if (!string.IsNullOrWhiteSpace(dto?.Notes)) order.Notes = dto.Notes;
+
+            await _db.SaveChangesAsync();
+
+            // Broadcast real-time SSE event for order status update
+            _eventStream.BroadcastEvent("order_status_update", new
+            {
+                orderId = order.Id,
+                status = order.OrderStatus,
+                updatedAt = order.UpdatedDate
+            });
+
+            return Ok(new
+            {
+                success = true,
+                message = $"Order #{id} marked as '{newStatus}' successfully!",
+                orderId = order.Id,
+                status = order.OrderStatus
+            });
         }
     }
 }

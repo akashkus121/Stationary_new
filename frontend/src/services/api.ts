@@ -413,6 +413,29 @@ export const api = {
     return data;
   },
 
+  async updateOrderStatus(orderId: number, status: string = 'Ready', notes?: string) {
+    let res = await fetch(`${API_BASE_URL}/ordersapi/update-status/${orderId}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ status, notes }),
+    });
+
+    if (res.status === 401) {
+      const refreshed = await this.refreshToken();
+      if (refreshed) {
+        res = await fetch(`${API_BASE_URL}/ordersapi/update-status/${orderId}`, {
+          method: 'PUT',
+          headers: getHeaders(),
+          body: JSON.stringify({ status, notes }),
+        });
+      }
+    }
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to update order status.');
+    return data;
+  },
+
   // Admin Features
   async getStockManagement() {
     const res = await fetch(`${API_BASE_URL}/adminapi/stock-management`, {

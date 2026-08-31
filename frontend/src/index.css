@@ -6624,6 +6624,174 @@ body {
   justify-content: center;
 }
 
+/* =====================================================================
+   ADMIN: CUSTOMER ORDER STATUS MANAGEMENT & "MAKE IT READY" BUTTON
+   ===================================================================== */
+.admin-order-card {
+  position: relative;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+
+.admin-order-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.admin-order-card.order-card-ready {
+  border-left: 4px solid #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.7) 100%);
+}
+
+.admin-order-card.order-card-completed {
+  border-left: 4px solid #38bdf8;
+}
+
+.order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.order-status-badge.status-ready {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.order-status-badge.status-completed {
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+.order-status-badge.status-pending {
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+
+.order-status-badge.status-cancelled {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.admin-order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.order-total-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-total-label {
+  font-size: 0.72rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.admin-order-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* "Make It Ready" Button */
+.btn-mark-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-mark-ready:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+.btn-mark-ready:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.order-status-dropdown-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-status-label {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.order-status-select {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.order-status-select:focus {
+  border-color: #f59e0b;
+}
+
+.order-status-select.select-ready {
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.order-status-select.select-completed {
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.order-status-select.select-cancelled {
+  border-color: #f87171;
+  color: #f87171;
+}
+
+
 
 
 

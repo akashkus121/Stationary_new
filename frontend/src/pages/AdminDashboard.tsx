@@ -134,6 +134,23 @@ export const AdminDashboard: React.FC = () => {
     }
   }, []);
 
+  const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
+
+  const handleUpdateOrderStatus = async (orderId: number, newStatus: string) => {
+    setUpdatingOrderId(orderId);
+    try {
+      const res = await api.updateOrderStatus(orderId, newStatus);
+      setAlertMsg({ type: 'success', text: res.message || `Order #${orderId} marked as ${newStatus}!` });
+      setAllOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, orderStatus: newStatus } : o))
+      );
+    } catch (err: any) {
+      setAlertMsg({ type: 'error', text: err.message || 'Failed to update order status.' });
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
   // Fetch Stock Management Data
   const fetchStockData = useCallback(async () => {
     try {
@@ -1502,42 +1519,103 @@ export const AdminDashboard: React.FC = () => {
             </div>
           ) : (
             <div className="all-orders-admin-list">
-              {filteredOrders.map((order) => (
-                <div key={order.id} className="admin-order-card">
-                  <div className="admin-order-header">
-                    <div className="admin-order-meta">
-                      <span className="order-badge">Order #{order.id}</span>
-                      <span className="customer-tag">
-                        <UserIcon size={14} />
-                        Customer: <strong>{order.username || `User #${order.userId}`}</strong>
-                      </span>
-                      <span className="order-date-tag">
-                        <Calendar size={14} />
-                        {new Date(order.date).toLocaleString()}
-                      </span>
-                    </div>
+              {filteredOrders.map((order) => {
+                const currentStatus = order.orderStatus || 'Pending';
+                const isReady = currentStatus.toLowerCase() === 'ready';
+                const isCompleted = currentStatus.toLowerCase() === 'completed';
+                const isCancelled = currentStatus.toLowerCase() === 'cancelled';
+                const isUpdating = updatingOrderId === order.id;
 
-                    <div className="order-payment-tag">
-                      <CreditCard size={14} />
-                      <span>{order.paymentMethod?.toUpperCase()}</span>
-                    </div>
-                  </div>
+                return (
+                  <div key={order.id} className={`admin-order-card ${isReady ? 'order-card-ready' : isCompleted ? 'order-card-completed' : ''}`}>
+                    <div className="admin-order-header">
+                      <div className="admin-order-meta">
+                        <span className="order-badge">Order #{order.id}</span>
+                        
+                        {/* Order Status Badge */}
+                        {isReady ? (
+                          <span className="order-status-badge status-ready">
+                            <CheckCircle2 size={13} /> Ready for Pickup
+                          </span>
+                        ) : isCompleted ? (
+                          <span className="order-status-badge status-completed">
+                            <FileCheck size={13} /> Completed
+                          </span>
+                        ) : isCancelled ? (
+                          <span className="order-status-badge status-cancelled">
+                            <X size={13} /> Cancelled
+                          </span>
+                        ) : (
+                          <span className="order-status-badge status-pending">
+                            <Clock size={13} /> Preparing / Pending
+                          </span>
+                        )}
 
-                  <div className="admin-order-items-grid">
-                    {order.items?.map((item, idx) => (
-                      <div key={idx} className="admin-order-item-badge">
-                        <span>{item.productName}</span>
-                        <strong>× {item.quantity} (Rs. {(item.price * item.quantity).toFixed(2)})</strong>
+                        <span className="customer-tag">
+                          <UserIcon size={14} />
+                          Customer: <strong>{order.username || `User #${order.userId}`}</strong>
+                        </span>
+                        <span className="order-date-tag">
+                          <Calendar size={14} />
+                          {new Date(order.date).toLocaleString()}
+                        </span>
                       </div>
-                    ))}
-                  </div>
 
-                  <div className="admin-order-footer">
-                    <span>Total Amount Charged</span>
-                    <strong className="order-total-price">Rs. {Number(order.totalAmount).toFixed(2)}</strong>
+                      <div className="order-payment-tag">
+                        <CreditCard size={14} />
+                        <span>{order.paymentMethod?.toUpperCase()}</span>
+                      </div>
+                    </div>
+
+                    <div className="admin-order-items-grid">
+                      {order.items?.map((item, idx) => (
+                        <div key={idx} className="admin-order-item-badge">
+                          <span>{item.productName}</span>
+                          <strong>× {item.quantity} (Rs. {(item.price * item.quantity).toFixed(2)})</strong>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="admin-order-footer">
+                      <div className="order-total-block">
+                        <span className="order-total-label">Total Amount Charged</span>
+                        <strong className="order-total-price">Rs. {Number(order.totalAmount).toFixed(2)}</strong>
+                      </div>
+
+                      {/* Admin Order Action Bar (Make it Ready / Change Status) */}
+                      <div className="admin-order-actions-bar">
+                        {!isReady && !isCompleted && (
+                          <button
+                            type="button"
+                            className="btn-mark-ready"
+                            onClick={() => handleUpdateOrderStatus(order.id, 'Ready')}
+                            disabled={isUpdating}
+                            title="Mark this customer order as Ready for pickup/dispatch"
+                          >
+                            <CheckCircle2 size={16} />
+                            <span>{isUpdating ? 'Updating...' : 'Make It Ready'}</span>
+                          </button>
+                        )}
+
+                        <div className="order-status-dropdown-wrap">
+                          <label className="order-status-label">Status:</label>
+                          <select
+                            className={`order-status-select select-${currentStatus.toLowerCase()}`}
+                            value={currentStatus}
+                            onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+                            disabled={isUpdating}
+                          >
+                            <option value="Pending">Pending / In Prep</option>
+                            <option value="Ready">Ready for Pickup</option>
+                            <option value="Completed">Completed / Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
