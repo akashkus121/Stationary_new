@@ -36,14 +36,19 @@ import {
   Clock,
   PieChart,
   Eye,
-  EyeOff
+  EyeOff,
+  Store
 } from 'lucide-react';
 import type { Product, SalesReport, Order } from '../types';
 import { api } from '../services/api';
 import { ProductModal } from '../components/ProductModal';
 import { subscribeToStockEvents } from '../services/sse';
 
-export const AdminDashboard: React.FC = () => {
+interface AdminDashboardProps {
+  onViewStorefront?: () => void;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onViewStorefront }) => {
   const [activeTab, setActiveTab] = useState<'products' | 'stock-alerts' | 'bulk-create' | 'all-orders' | 'reports' | 'ocr-upload'>('products');
 
   // Products Tab State
@@ -605,6 +610,18 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="admin-header-actions">
+          {onViewStorefront && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onViewStorefront}
+              title="Preview Customer Storefront"
+            >
+              <Store size={16} />
+              <span>View Storefront</span>
+            </button>
+          )}
+
           <button
             className="btn btn-secondary"
             onClick={() => setActiveTab('bulk-create')}

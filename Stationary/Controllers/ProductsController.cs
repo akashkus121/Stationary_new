@@ -196,6 +196,7 @@ namespace Stationary.Controllers
             public int LowStockThreshold { get; set; } = 5;
             public bool IsVisible { get; set; } = true;
             public IFormFile? Image { get; set; }
+            public string? ImageUrl { get; set; }
         }
 
         [HttpPost]
@@ -220,6 +221,10 @@ namespace Stationary.Controllers
                 }
 
                 imagePath = await _cloudinaryService.UploadImageAsync(dto.Image);
+            }
+            else if (!string.IsNullOrWhiteSpace(dto.ImageUrl))
+            {
+                imagePath = _cloudinaryService.ProcessImageUrl(dto.ImageUrl, dto.Category, dto.Name);
             }
             else
             {
@@ -248,7 +253,11 @@ namespace Stationary.Controllers
                 action = "create",
                 productId = product.Id,
                 productName = product.Name,
+                category = product.Category,
+                price = product.Price,
+                imagePath = product.ImagePath,
                 stockQuantity = product.StockQuantity,
+                lowStockThreshold = product.LowStockThreshold,
                 isVisible = product.IsVisible,
                 timestamp = DateTime.UtcNow
             });
@@ -285,6 +294,10 @@ namespace Stationary.Controllers
                     product.ImagePath = await _cloudinaryService.UploadImageAsync(dto.Image);
                 }
             }
+            else if (!string.IsNullOrWhiteSpace(dto.ImageUrl))
+            {
+                product.ImagePath = _cloudinaryService.ProcessImageUrl(dto.ImageUrl, dto.Category, dto.Name);
+            }
 
             await _db.SaveChangesAsync();
             await InvalidateProductCachesAsync();
@@ -294,7 +307,11 @@ namespace Stationary.Controllers
                 action = "update",
                 productId = product.Id,
                 productName = product.Name,
+                category = product.Category,
+                price = product.Price,
+                imagePath = product.ImagePath,
                 stockQuantity = product.StockQuantity,
+                lowStockThreshold = product.LowStockThreshold,
                 isVisible = product.IsVisible,
                 timestamp = DateTime.UtcNow
             });

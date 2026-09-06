@@ -6584,6 +6584,100 @@ body {
   color: #f87171;
 }
 
+/* =====================================================================
+   ADMIN NAV SWITCHER & STOREFRONT / ADMIN TOGGLE
+   ===================================================================== */
+.admin-nav-switcher {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-color);
+  gap: 4px;
+}
+
+.nav-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-switch-btn:hover {
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.nav-switch-btn.active {
+  background: #ffffff;
+  color: var(--accent-primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================================================================
+   STREAM OF IMAGES (TOP SELLING UNIFIED THUMBNAILS STRIP)
+   ===================================================================== */
+.unified-thumbs-stream {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 6px 4px;
+}
+
+.unified-thumbs-stream::-webkit-scrollbar {
+  display: none;
+}
+
+.unified-thumb-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.unified-thumb-btn:hover {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+.unified-thumb-btn.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
+  transform: scale(1.15);
+}
+
+.unified-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
 
 
 

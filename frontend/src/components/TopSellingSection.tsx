@@ -106,6 +106,35 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
     }
   };
 
+  const getImageUrl = (path?: string, category?: string, name?: string) => {
+    if (path && path.trim() !== '') {
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+      }
+      const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+      const cleanBase = apiBase.replace('/api', '');
+      return `${cleanBase}${path.startsWith('/') ? '' : '/'}${path}`;
+    }
+
+    const cat = (category || '').toLowerCase();
+    const n = (name || '').toLowerCase();
+
+    if (cat.includes('notebook') || n.includes('notebook') || n.includes('journal')) {
+      return 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=85';
+    }
+    if (cat.includes('writing') || n.includes('pen') || n.includes('marker') || n.includes('highlighter')) {
+      return 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=1200&auto=format&fit=crop&q=85';
+    }
+    if (cat.includes('desk') || n.includes('pad') || n.includes('sticky')) {
+      return 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=1200&auto=format&fit=crop&q=85';
+    }
+    if (cat.includes('school') || n.includes('ruler') || n.includes('geometry')) {
+      return 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&auto=format&fit=crop&q=85';
+    }
+
+    return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=85';
+  };
+
   return (
     <section 
       className="top-selling-unified-banner"
@@ -121,11 +150,41 @@ export const TopSellingSection: React.FC<TopSellingSectionProps> = ({ products, 
         </div>
         <img 
           key={currentProduct.id}
-          src={currentProduct.imagePath || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=85'} 
+          src={getImageUrl(currentProduct.imagePath, currentProduct.category, currentProduct.name)} 
           alt={currentProduct.name} 
           className={`unified-hero-img slide-anim-${slideDirection}`}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&auto=format&fit=crop&q=85';
+          }}
         />
         <div className="unified-img-overlay"></div>
+
+        {/* Thumbnail Stream Strip for quick image switching */}
+        {topProducts.length > 1 && (
+          <div className="unified-thumbs-stream">
+            {topProducts.map((p, idx) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`unified-thumb-btn ${idx === currentIndex ? 'active' : ''}`}
+                onClick={() => {
+                  setSlideDirection(idx > currentIndex ? 'next' : 'prev');
+                  setCurrentIndex(idx);
+                }}
+                title={p.name}
+              >
+                <img
+                  src={getImageUrl(p.imagePath, p.category, p.name)}
+                  alt={p.name}
+                  className="unified-thumb-img"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=150&auto=format&fit=crop';
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 30% Right Column: Header, Info, Controls & Actions */}

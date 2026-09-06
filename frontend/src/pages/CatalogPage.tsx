@@ -97,10 +97,16 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({ onOpenAuth }) => {
     loadProducts(products.length === 0);
   }, [loadProducts, products.length]);
 
-  // Real-time Server-Sent Events (SSE): Targeted in-memory stock patch (Zero unnecessary network refetches)
+  // Real-time Server-Sent Events (SSE): Live image, stock, and product stream synchronization
   useEffect(() => {
     const unsubscribe = subscribeToStockEvents((eventData) => {
-      if (eventData && eventData.productId) {
+      if (!eventData) return;
+
+      api.clearProductCache();
+
+      if (eventData.action === 'create' || eventData.action === 'bulk_csv_import' || eventData.action === 'bulk_create') {
+        loadProducts(false);
+      } else if (eventData.productId) {
         setProducts((prev) =>
           prev.map((p) =>
             p.id === eventData.productId
@@ -108,12 +114,15 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({ onOpenAuth }) => {
                   ...p,
                   stockQuantity: eventData.stockQuantity !== undefined ? eventData.stockQuantity : p.stockQuantity,
                   isVisible: eventData.isVisible !== undefined ? eventData.isVisible : p.isVisible,
+                  imagePath: eventData.imagePath || p.imagePath,
+                  price: eventData.price !== undefined ? eventData.price : p.price,
+                  category: eventData.category || p.category,
+                  name: eventData.productName || p.name,
                 }
               : p
           )
         );
       } else {
-        api.clearProductCache();
         loadProducts(false);
       }
     });

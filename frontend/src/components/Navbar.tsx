@@ -1,5 +1,5 @@
 import React from 'react';
-import { User as UserIcon, ShieldAlert, LogOut, PenTool } from 'lucide-react';
+import { User as UserIcon, ShieldAlert, LogOut, PenTool, Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
@@ -10,14 +10,14 @@ interface NavbarProps {
   setActiveTab: (tab: 'catalog' | 'admin') => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenProfile, setActiveTab }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenProfile, activeTab = 'catalog', setActiveTab }) => {
   const { user, isAdmin, logout } = useAuth();
 
   return (
     <header className="navbar-container">
       <div className="navbar-inner">
         {/* Brand Logo & Name */}
-        <div className="navbar-brand" onClick={() => setActiveTab(isAdmin ? 'admin' : 'catalog')}>
+        <div className="navbar-brand clickable" onClick={() => setActiveTab('catalog')}>
           <div className="brand-icon-box">
             <PenTool size={22} className="brand-icon" />
           </div>
@@ -27,12 +27,28 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onOpenProfile, setAc
           </div>
         </div>
 
-        {/* Center Nav Links (Admin Indicator Only) */}
+        {/* Center Nav Links (Admin vs Storefront Switcher) */}
         {isAdmin && (
           <nav className="navbar-nav">
-            <div className="admin-active-suite-tag">
-              <ShieldAlert size={17} />
-              <span>Admin Management Suite</span>
+            <div className="admin-nav-switcher">
+              <button
+                type="button"
+                className={`nav-switch-btn ${activeTab === 'catalog' ? 'active' : ''}`}
+                onClick={() => setActiveTab('catalog')}
+                title="View customer storefront"
+              >
+                <Store size={16} />
+                <span>Storefront</span>
+              </button>
+              <button
+                type="button"
+                className={`nav-switch-btn ${activeTab === 'admin' ? 'active' : ''}`}
+                onClick={() => setActiveTab('admin')}
+                title="Open Admin Management Suite"
+              >
+                <ShieldAlert size={16} />
+                <span>Admin Suite</span>
+              </button>
             </div>
           </nav>
         )}

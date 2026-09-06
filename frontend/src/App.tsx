@@ -62,7 +62,7 @@ function MainApp() {
       {/* Page Content */}
       <main className="main-content">
         {activeTab === 'admin' && isAdmin ? (
-          <AdminDashboard />
+          <AdminDashboard onViewStorefront={() => setActiveTab('catalog')} />
         ) : (
           <CatalogPage
             onOpenAuth={handleOpenAuth}
