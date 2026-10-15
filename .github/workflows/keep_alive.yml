@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Ping Health Endpoint
         run: |
-          curl -s -f "https://<your-render-app-name>.onrender.com/health" || echo "Ping completed"
+          curl -s -f "https://stationary-new-1.onrender.com//health" || echo "Ping completed"
